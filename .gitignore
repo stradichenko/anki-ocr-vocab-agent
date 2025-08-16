@@ -1,0 +1,4 @@
+# all content in input
+input/*
+anki_cards.csv
+agent_output.txt
