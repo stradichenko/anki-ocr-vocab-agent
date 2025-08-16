@@ -32,7 +32,7 @@ def create_vocab_agent(
         max_steps=max_steps,
         verbosity_level=verbosity_level,
         add_base_tools=False,
-        additional_authorized_imports=['base64', 'io']
+        additional_authorized_imports=['io', 'yaml']
     )
     
     return agent
