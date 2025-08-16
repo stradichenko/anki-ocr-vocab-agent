@@ -166,6 +166,35 @@ def run_comprehensive_self_test():
     except Exception as e:
         print(f"   ❌ YAML quote handling error: {e}")
     
+    # Test 6: Vision model test
+    print("\n👁️  TEST 6: Vision Model Capabilities")
+    print("-" * 40)
+    
+    try:
+        from PIL import Image
+        import io
+        
+        # Create a simple test image with text
+        print("→ Testing PIL and image loading...")
+        test_image_path = "input/vocabulary_page.png"
+        
+        if os.path.exists(test_image_path):
+            image = Image.open(test_image_path)
+            print(f"   ✅ PIL successfully loaded image: {image.size} {image.mode}")
+            
+            # Test image conversion
+            img_bytes = io.BytesIO()
+            image.save(img_bytes, format='PNG')
+            print(f"   ✅ Image conversion successful: {len(img_bytes.getvalue())} bytes")
+        else:
+            print(f"   ⚠️  Test image not found: {test_image_path}")
+            
+    except ImportError as e:
+        print(f"   ❌ PIL import error: {e}")
+        print("   💡 Install with: pip install Pillow")
+    except Exception as e:
+        print(f"   ❌ Vision test error: {e}")
+    
     print("\n" + "="*80)
     print("🏁 SELF-TEST COMPLETE")
     print("="*80)

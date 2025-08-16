@@ -1,31 +1,29 @@
+"""Prompt templates for OCR and vocabulary processing."""
+
 OCR_PROMPT = """
-You are analyzing a vocabulary image with your vision capabilities.
+You are a Vision Language Model analyzing a vocabulary image.
+
+CRITICAL RULES:
+1. Look at the provided image and extract ONLY real content you can see
+2. DO NOT generate fake data like "word1", "word2", "definition1", "example1"
+3. If you cannot see the image clearly, say "Cannot process image visually"
 
 TASK:
-Extract all vocabulary words, their definitions, and example sentences from the image.
-
-PROCESS:
-1. Visually read the image.
-2. Identify vocabulary entries (word, definition, part of speech, examples).
-3. Format them in the following YAML structure.
-4. Call the tool `yaml_to_anki(yaml_content)` with your YAML output.
+Examine the image and extract vocabulary words, definitions, and examples.
+Format as YAML and call yaml_to_anki.
 
 YAML FORMAT:
-- word: [word from image]
-  back: '[definition] ("[example 1]", "[example 2]")'
+- word: [real word from image]
+  back: '[real definition] ("[real example 1]", "[real example 2]")'
   tags: [part of speech]
 
-EXAMPLE:
-
-yaml_content = '''- word: meticulous
-  back: 'extremely careful and precise ("He is meticulous", "Finish it meticulously")'
+EXAMPLE TOOL CALL:
+<code>
+yaml_content = '''- word: magnificent
+  back: 'extremely beautiful or impressive ("The view was magnificent", "She gave a magnificent performance")'
   tags: adjective'''
 yaml_to_anki(yaml_content)
+</code>
 
-IMPORTANT RULES:
-- Only extract what is actually visible in the image.
-- If you cannot read the image, output: "Cannot process image visually" and stop.
-- Do not generate placeholder or assumed content.
-- Do not import libraries or decode text manually.
-- Do not use example words like apple, banana, etc. unless they are really in the image.
+Extract ONLY what you actually see in the image!
 """
