@@ -1,0 +1,2 @@
+usage: vocab_ocr_agent.py [-h] [--model MODEL] image
+vocab_ocr_agent.py: error: the following arguments are required: image
