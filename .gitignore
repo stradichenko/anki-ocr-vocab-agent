@@ -2,3 +2,5 @@
 input/*
 anki_cards.csv
 agent_output.txt
+demo/*
+agent_self_test.txt
