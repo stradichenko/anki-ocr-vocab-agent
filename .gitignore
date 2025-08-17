@@ -1,9 +1,10 @@
-# all content in input
+# content
 input/*
 anki_cards.csv
-agent_output.txt
 demo/*
 agent_self_test.txt
+agent_output_stderr.txt
+processed_images.json
 
 # Python
 __pycache__/
@@ -56,6 +57,5 @@ Thumbs.db
 *.tmp
 *.temp
 *.log
-
-# Project specific
-yaml_to_anki.py
+agent_output.txt
+agent_output_stderr.txt

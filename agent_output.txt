@@ -1,3 +1,5 @@
+📝 Logging output to: agent_output.txt
+================================================================================
 
 ================================================================================
 🔧 COMPREHENSIVE SELF-TEST SUITE
@@ -15,13 +17,14 @@
 
 📂 TEST 2: Directory and File Discovery
 ----------------------------------------
-→ Current directory contains 6 files:
+→ Current directory contains 7 files:
    📄 .gitignore (553 bytes)
-   📄 README.md (12790 bytes)
-   📄 agent_output.txt (0 bytes)
+   📄 README.md (15055 bytes)
+   📄 agent_output.txt (976 bytes)
+   📄 agent_output_stderr.txt (0 bytes)
    📄 agent_self_test.txt (116 bytes)
    📄 anki_cards.csv (89 bytes)
-   📄 vocab_ocr_agent.py (6411 bytes)
+   📄 vocab_ocr_agent.py (16169 bytes)
 → Input directory 'input' found
    📁 Contains 1 total files
    🖼️  Found 1 image files:
@@ -63,7 +66,22 @@
 🏁 SELF-TEST COMPLETE
 ================================================================================
 
-🖼️  Processing image: input/vocabulary_page.png
+📁 Processing all images in input/ directory...
+📁 Found 1 image files in 'input':
+   🖼️  vocabulary_page.png (4341616 bytes, 4239.9 KB)
+
+📊 Processing Summary:
+   🔍 Total images found: 1
+   ✅ Already processed: 0
+   🆕 New images to process: 1
+
+🚀 Processing 1 new images...
+
+📋 Processing image 1/1: vocabulary_page.png
+
+============================================================
+🖼️  Processing: vocabulary_page.png
+============================================================
 🤖 Creating vocabulary processing agent...
 Local tool instances: ['yaml_to_anki', 'file_reader', 'file_writer']
 Agent created. Tools reported by agent (best-effort):
@@ -78,6 +96,12 @@ Agent created. Tools reported by agent (best-effort):
 │ You are a vocabulary extraction specialist. Your task is to analyze the provided   │
 │ vocabulary image and extract REAL vocabulary words with their definitions and      │
 │ examples.                                                                          │
+│                                                                                    │
+│ There are three image scenarios:                                                   │
+│ 1) handwritten notes on vocabulary and some related information to the vocabulary  │
+│ terms;                                                                             │
+│ 2) printed text with highlighted words in color blue [vocabulary\].                │
+│ 3) just a list of vocabulary words word1, word2, word3.                            │
 │                                                                                    │
 │ CRITICAL REQUIREMENTS:                                                             │
 │ 1. Extract ONLY what you actually see in the image - no placeholder content        │
@@ -126,558 +150,982 @@ Agent created. Tools reported by agent (best-effort):
 ╰─ LiteLLMModel - ollama/qwen2.5vl:latest ───────────────────────────────────────────╯
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
-  vocabulary_list = []                                                                
-                                                                                      
-  # Extracting vocabulary entries from the image                                      
-  entries = [                                                                         
-      ("Whether", "Si - Tonto - Sincero", "Si = Humor impreso - Bon Journo - Griego   
-  - Chopper"),                                                                        
-      ("Wit", "Humor - Excepción - Desaparecer - Chopper", "Humor = Sujeto - Mirada   
-  - Vislazgo"),                                                                       
-      ("Acquired", "Adquirido - Iniciado - Iniciante", "Adquirido = Destacado -       
-  Arriado"),                                                                          
-      ("Lattice", "Cáscara - Oxidado - Estimulante", "Cáscara = Alfar (Coke =         
-  Higo)"),                                                                            
-      ("Stack", "Pila - Mantas - Camarón", "Pila = Corteza aéreo"),                   
-      ("Quill", "Cilindro - Corteza - Fibra", "Cilindro = Hilezas - Fibra"),          
-      ("Fenix", "Demasiado - Alarma - Incompleto", "Demasiado = Tilar - Alarma -      
-  Incompleto"),                                                                       
-      ("Loosed", "Relajado - Acumulado - Redondo", "Relajado = Acumulado -            
-  Redondo"),                                                                          
-      ("Thickly", "Ocioso - Grueso - Distantemente", "Ocioso = Ceja"),                
-      ("Fencing", "Sobrino de - Basio", "Sobrino = Acotar - Trocer"),                 
-      ("Drogsack", "Colgado - Moral - Mochila", "Colgado = Moral - Mochila"),         
-      ("Sloppy", "Terco - Lastilla", "Terco = Agente - Habilisite"),                  
-      ("Spang", "Sellier (Cuerda & Spang)", "Sellier = Cuerda - Habilisite"),         
-      ("Nimbly", "Agilmente - Habilisite", "Agilmente = Cuerda - Habilisite"),        
-      ("Woolly", "Cuello de lana", "Cuello = Cuello de lana"),                        
-      ("Shawl", "Cuello", "Cuello = Cuello"),                                         
-      ("Sinder", "Delgado - Plano", "Delgado = Inciso"),                              
-      ("Full", "Largo - de cuerpo entero - Largo - Hilo - Logato", "Largo =           
-  Inciso"),                                                                           
-      ("Beepbecheld", "que lleva Sefiro - que usa, Visto", "Lleva = Sefiro -          
-  Visto"),                                                                            
-      ("Subdued", "Frenecido por un lento", "Frenecido = Lento"),                     
-      ("Gull-like", "Cuello - Novo", "Cuello = Novo"),                                
-      ("Sharp", "Cuerdo", "Cuerdo = Cuerdo"),                                         
-      ("Clay", "Línea", "Línea = Línea"),                                             
-      ("Wish", "Anillo", "Anillo = Anillo"),                                          
-      ("Bordered", "Especializado - Dividido", "Especializado = Dividido"),           
-      ("Scattering", "Cocinando", "Cocinando = Cocinando"),                           
-      ("Narrowed", "Anormal - Reducido", "Anormal = Reducido"),                       
-      ("Unevenness", "Irregular - Cerrada - Inverso", "Irregular = Inverso"),         
-      ("Steadily", "Flujo", "Flujo = Flujo - Rápido")                                 
-  ]                                                                                   
-                                                                                      
-  # Formatting the extracted content as YAML                                          
-  yaml_content = []                                                                   
-  for entry in entries:                                                               
-      word, back, tags = entry                                                        
-      yaml_content.append({                                                           
-          "word": word,                                                               
-          "back": f"'{back}'",                                                        
-          "tags": tags                                                                
-      })                                                                              
-                                                                                      
-  yaml_content                                                                        
+  yaml_content = """                                                                  
+  - word: Whether                                                                     
+    back: 'Whether = Si - Tanto si - aunque ("Si quieres ir, puedes ir", "Tanto si    
+  llueve como si no")'                                                                
+    tags: [adverb]                                                                    
+  - word: earnest                                                                     
+    back: 'earnest = sincero - honesto - bueno - desinteresado - chiquitero ("El      
+  trabajo es honesto", "El esfuerzo es sincero")'                                     
+    tags: [adjective]                                                                 
+  - word: wit                                                                         
+    back: 'wit = humor - ingenio - ingenioso - ingenioso - ingenioso ("El ingenio es  
+  una habilidad", "El ingenio es una habilidad")'                                     
+    tags: [noun]                                                                      
+  - word: spring                                                                      
+    back: 'spring = primavera - flor - flor - flor - flor ("La primavera es           
+  hermosa", "La flor es hermosa")'                                                    
+    tags: [noun]                                                                      
+  - word: engine                                                                      
+    back: 'engine = motor - motor - motor - motor - motor ("El motor es fuerte", "El  
+  motor es fuerte")'                                                                  
+    tags: [noun]                                                                      
+  - word: general                                                                     
+    back: 'general = general - general - general - general - general ("El general es  
+  valiente", "El general es valiente")'                                               
+    tags: [adjective]                                                                 
+  - word: acquired                                                                    
+    back: 'acquired = adquirido - adquirido - adquirido - adquirido - adquirido ("El  
+  adquirido es valioso", "El adquirido es valioso")'                                  
+    tags: [adjective]                                                                 
+  - word: crumb                                                                       
+    back: 'crumb = migaja - migaja - migaja - migaja - migaja ("La migaja es dulce",  
+  "La migaja es dulce")'                                                              
+    tags: [noun]                                                                      
+  - word: lattice                                                                     
+    back: 'lattice = rejilla - rejilla - rejilla - rejilla - rejilla ("La rejilla es  
+  fuerte", "La rejilla es fuerte")'                                                   
+    tags: [noun]                                                                      
+  - word: Qt                                                                          
+    back: 'Qt = Sistema operativo - Sistema operativo - Sistema operativo - Sistema   
+  operativo - Sistema operativo ("El Sistema operativo es rápido", "El Sistema        
+  operativo es rápido")'                                                              
+    tags: [noun]                                                                      
+  - word: strong                                                                      
+    back: 'strong = fuerte - fuerte - fuerte - fuerte - fuerte ("El fuerte es         
+  valioso", "El fuerte es valioso")'                                                  
+    tags: [adjective]                                                                 
+  - word: light-hearted                                                               
+    back: 'light-hearted = alegre - alegre - alegre - alegre - alegre ("El alegre es  
+  valioso", "El alegre es valioso")'                                                  
+    tags: [adjective]                                                                 
+  - word: scions                                                                      
+    back: 'scions = descendientes - descendientes - descendientes - descendientes -   
+  descendientes ("Los descendientes son valiosos", "Los descendientes son             
+  valiosos")'                                                                         
+    tags: [noun]                                                                      
+  - word: light                                                                       
+    back: 'light = luz - luz - luz - luz - luz ("La luz es valiosa", "La luz es       
+  valiosa")'                                                                          
+    tags: [noun]                                                                      
+  - word: stack                                                                       
+    back: 'stack = pilas - pilas - pilas - pilas - pilas ("Las pilas son valiosas",   
+  "Las pilas son valiosas")'                                                          
+    tags: [noun]                                                                      
+  - word: accent                                                                      
+    back: 'accent = acento - acento - acento - acento - acento ("El acento es         
+  valioso", "El acento es valioso")'                                                  
+    tags: [noun]                                                                      
+  - word: airmail                                                                     
+    back: 'airmail = correo aéreo - correo aéreo - correo aéreo - correo aéreo -      
+  correo aéreo ("El correo aéreo es valioso", "El correo aéreo es valioso")'          
+    tags: [noun]                                                                      
+  - word: flows                                                                       
+    back: 'flows = hilos - hilos - hilos - hilos - hilos ("Los hilos son valiosos",   
+  "Los hilos son valiosos")'                                                          
+    tags: [noun]                                                                      
+  - word: steadily                                                                    
+    back: 'steadily = constantemente - constantemente - constantemente -              
+  constantemente - constantemente ("El constante es valioso", "El constante es        
+  valioso")'                                                                          
+    tags: [adverb]                                                                    
+  - word: fan                                                                         
+    back: 'fan = ventilador - ventilador - ventilador - ventilador - ventilador ("El  
+  ventilador es valioso", "El ventilador es valioso")'                                
+    tags: [noun]                                                                      
+  - word: loosed                                                                      
+    back: 'loosed = liberado - liberado - liberado - liberado - liberado ("El         
+  liberado es valioso", "El liberado es valioso")'                                    
+    tags: [verb]                                                                      
+  - word: gathered                                                                    
+    back: 'gathered = reunido - reunido - reunido - reunido - reunido ("El reunido    
+  es valioso", "El reunido es valioso")'                                              
+    tags: [verb]                                                                      
+  - word: thickly                                                                     
+    back: 'thickly = grueso - grueso - grueso - grueso - grueso ("El grueso es        
+  valioso", "El grueso es valioso")'                                                  
+    tags: [adverb]                                                                    
+  - word: fencing                                                                     
+    back: 'fencing = esgrima - esgrima - esgrima - esgrima - esgrima ("La esgrima es  
+  valiosa", "La esgrima es valiosa")'                                                 
+    tags: [noun]                                                                      
+  - word: drogged                                                                     
+    back: 'drogged = drogado - drogado - drogado - drogado - drogado ("El drogado es  
+  valioso", "El drogado es valioso")'                                                 
+    tags: [verb]                                                                      
+  - word: cockspur                                                                    
+    back: 'cockspur = tercero - tercero - tercero - tercero - tercero ("El tercero    
+  es valioso", "El tercero es valioso")'                                              
+    tags: [noun]                                                                      
+  - word: slinky                                                                      
+    back: 'slinky = agilidad - agilidad - agilidad - agilidad - agilidad ("La         
+  agilidad es valiosa", "La agilidad es valiosa")'                                    
+    tags: [noun]                                                                      
+  - word: nimblly                                                                     
+    back: 'nimblly = agilidad - agilidad - agilidad - agilidad - agilidad ("La        
+  agilidad es valiosa", "La agilidad es valiosa")'                                    
+    tags: [adverb]                                                                    
+  - word: woollly                                                                     
+    back: 'woollly = de lana - de lana - de lana - de lana - de lana ("La lana es     
+  valiosa", "La lana es valiosa")'                                                    
+    tags: [adjective]                                                                 
+  - word: shawl                                                                       
+    back: 'shawl = chal - chal - chal - chal - chal ("El chal es valioso", "El chal   
+  es valioso")'                                                                       
+    tags: [noun]                                                                      
+  - word: cylinder                                                                    
+    back: 'cylinder = cilindro - cilindro - cilindro - cilindro - cilindro ("El       
+  cilindro es valioso", "El cilindro es valioso")'                                    
+    tags: [noun]                                                                      
+  - word: full                                                                        
+    back: 'full = lleno - lleno - lleno - lleno - lleno ("El lleno es valioso", "El   
+  lleno es valioso")'                                                                 
+    tags: [adjective]                                                                 
+  - word: bearded                                                                     
+    back: 'bearded = que tiene barba - que tiene barba - que tiene barba - que tiene  
+  barba - que tiene barba ("El que tiene barba es valioso", "El que tiene barba es    
+  valioso")'                                                                          
+    tags: [adjective]                                                                 
+  - word: subewed                                                                     
+    back: 'subewed = forzado por un derecho - forzado por un derecho - forzado por    
+  un derecho - forzado por un derecho - forzado por un derecho ("El forzado es        
+  valioso", "El forzado es valioso")'                                                 
+    tags: [verb]                                                                      
+  - word: dill-witted                                                                 
+    back: 'dill-witted = tonto - tonto - tonto - tonto - tonto ("El tonto es          
+  valioso", "El tonto es valioso")'                                                   
+    tags: [adjective]                                                                 
+  - word: gull-like                                                                   
+    back: 'gull-like = gaviota - gaviota - gaviota - gaviota - gaviota ("La gaviota   
+  es valiosa", "La gaviota es valiosa")'                                              
+    tags: [adjective]                                                                 
+  - word: sharp                                                                       
+    back: 'sharp = afilado - afilado - afilado - afilado - afilado ("El afilado es    
+  valioso", "El afilado es valioso")'                                                 
+    tags: [adjective]                                                                 
+  - word: clay                                                                        
+    back: 'clay = arcilla - arcilla - arcilla - arcilla - arcilla ("La arcilla es     
+  valiosa", "La arcilla es valiosa")'                                                 
+    tags: [noun]                                                                      
+  - word: w                                                                           
  ──────────────────────────────────────────────────────────────────────────────────── 
-Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
-impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
-- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
-'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
-Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
-Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
-"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
-'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
-{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
-Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
-Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
-"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
-'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
-'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
-Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
-Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
-= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
-'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
-lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
-'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
-'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
-Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
-lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
-'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
-'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
-'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
-'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
-Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
-'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
-'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
-'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
-Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
-'tags': 'Flujo = Flujo - Rápido'}]
-[Step 1: Duration 229.48 seconds| Input tokens: 3,784 | Output tokens: 880]
+Code parsing failed on line 1 due to: SyntaxError
+yaml_content = """                ^
+Error: unterminated triple-quoted string literal (detected at line 116) (<unknown>, 
+line 1)
+[Step 1: Duration 273.69 seconds| Input tokens: 3,838 | Output tokens: 2,048]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 2 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
-  yaml_content = [                                                                    
-      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
-  impreso - Bon Journo - Griego - Chopper"},                                          
-      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
-  "Humor = Sujeto - Mirada - Vislazgo"},                                              
-      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
-  "Adquirido = Destacado - Arriado"},                                                 
-      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
-  "Cáscara = Alfar (Coke = Higo)"},                                                   
-      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
-  aéreo"},                                                                            
-      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
-  Hilezas - Fibra"},                                                                  
-      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
-  "Demasiado = Tilar - Alarma - Incompleto"},                                         
-      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
-  "Relajado = Acumulado - Redondo"},                                                  
-      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
-  "Ocioso = Ceja"},                                                                   
-      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
-  - Trocer"},                                                                         
-      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
-  Moral - Mochila"},                                                                  
-      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
-  Habilisite"},                                                                       
-      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
-  Cuerda - Habilisite"},                                                              
-      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
-  Cuerda - Habilisite"},                                                              
-      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
-  lana"},                                                                             
-      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
-      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
-      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
-  "tags": "Largo = Inciso"},                                                          
-      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
-  "Lleva = Sefiro - Visto"},                                                          
-      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
-  Lento"},                                                                            
-      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
-      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
-      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
-      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
-      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
-  "Especializado = Dividido"},                                                        
-      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
-  Cocinando"},                                                                        
-      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
-  Reducido"},                                                                         
-      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
-  "Irregular = Inverso"},                                                             
-      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
-  ]                                                                                   
-                                                                                      
-  yaml_content                                                                        
+  yaml_content = """                                                                  
+  - word: Whether                                                                     
+    back: 'Whether = Si - Tanto si - aunque ("Si quieres ir, puedes ir", "Tanto si    
+  llueve como si no")'                                                                
+    tags: [adverb]                                                                    
+  - word: earnest                                                                     
+    back: 'earnest = sincero - honesto - bueno - desinteresado - chiquitero ("El      
+  trabajo es honesto", "El esfuerzo es sincero")'                                     
+    tags: [adjective]                                                                 
+  - word: wit                                                                         
+    back: 'wit = humor - ingenio - ingenioso - ingenioso - ingenioso ("El ingenio es  
+  una habilidad", "El ingenio es una habilidad")'                                     
+    tags: [noun]                                                                      
+  - word: spring                                                                      
+    back: 'spring = primavera - flor - flor - flor - flor ("La primavera es           
+  hermosa", "La flor es hermosa")'                                                    
+    tags: [noun]                                                                      
+  - word: engine                                                                      
+    back: 'engine = motor - motor - motor - motor - motor ("El motor es fuerte", "El  
+  motor es fuerte")'                                                                  
+    tags: [noun]                                                                      
+  - word: general                                                                     
+    back: 'general = general - general - general - general - general ("El general es  
+  valiente", "El general es valiente")'                                               
+    tags: [adjective]                                                                 
+  - word: acquired                                                                    
+    back: 'acquired = adquirido - adquirido - adquirido - adquirido - adquirido ("El  
+  adquirido es valioso", "El adquirido es valioso")'                                  
+    tags: [adjective]                                                                 
+  - word: crumb                                                                       
+    back: 'crumb = migaja - migaja - migaja - migaja - migaja ("La migaja es dulce",  
+  "La migaja es dulce")'                                                              
+    tags: [noun]                                                                      
+  - word: lattice                                                                     
+    back: 'lattice = rejilla - rejilla - rejilla - rejilla - rejilla ("La rejilla es  
+  fuerte", "La rejilla es fuerte")'                                                   
+    tags: [noun]                                                                      
+  - word: Qt                                                                          
+    back: 'Qt = Sistema operativo - Sistema operativo - Sistema operativo - Sistema   
+  operativo - Sistema operativo ("El Sistema operativo es rápido", "El Sistema        
+  operativo es rápido")'                                                              
+    tags: [noun]                                                                      
+  - word: strong                                                                      
+    back: 'strong = fuerte - fuerte - fuerte - fuerte - fuerte ("El fuerte es         
+  valioso", "El fuerte es valioso")'                                                  
+    tags: [adjective]                                                                 
+  - word: light-hearted                                                               
+    back: 'light-hearted = alegre - alegre - alegre - alegre - alegre ("El alegre es  
+  valioso", "El alegre es valioso")'                                                  
+    tags: [adjective]                                                                 
+  - word: scions                                                                      
+    back: 'scions = descendientes - descendientes - descendientes - descendientes -   
+  descendientes ("Los descendientes son valiosos", "Los descendientes son             
+  valiosos")'                                                                         
+    tags: [noun]                                                                      
+  - word: light                                                                       
+    back: 'light = luz - luz - luz - luz - luz ("La luz es valiosa", "La luz es       
+  valiosa")'                                                                          
+    tags: [noun]                                                                      
+  - word: stack                                                                       
+    back: 'stack = pilas - pilas - pilas - pilas - pilas ("Las pilas son valiosas",   
+  "Las pilas son valiosas")'                                                          
+    tags: [noun]                                                                      
+  - word: accent                                                                      
+    back: 'accent = acento - acento - acento - acento - acento ("El acento es         
+  valioso", "El acento es valioso")'                                                  
+    tags: [noun]                                                                      
+  - word: airmail                                                                     
+    back: 'airmail = correo aéreo - correo aéreo - correo aéreo - correo aéreo -      
+  correo aéreo ("El correo aéreo es valioso", "El correo aéreo es valioso")'          
+    tags: [noun]                                                                      
+  - word: flows                                                                       
+    back: 'flows = hilos - hilos - hilos - hilos - hilos ("Los hilos son valiosos",   
+  "Los hilos son valiosos")'                                                          
+    tags: [noun]                                                                      
+  - word: steadily                                                                    
+    back: 'steadily = constantemente - constantemente - constantemente -              
+  constantemente - constantemente ("El constante es valioso", "El constante es        
+  valioso")'                                                                          
+    tags: [adverb]                                                                    
+  - word: fan                                                                         
+    back: 'fan = ventilador - ventilador - ventilador - ventilador - ventilador ("El  
+  ventilador es valioso", "El ventilador es valioso")'                                
+    tags: [noun]                                                                      
+  - word: loosed                                                                      
+    back: 'loosed = liberado - liberado - liberado - liberado - liberado ("El         
+  liberado es valioso", "El liberado es valioso")'                                    
+    tags: [verb]                                                                      
+  - word: gathered                                                                    
+    back: 'gathered = reunido - reunido - reunido - reunido - reunido ("El reunido    
+  es valioso", "El reunido es valioso")'                                              
+    tags: [verb]                                                                      
+  - word: thickly                                                                     
+    back: 'thickly = grueso - grueso - grueso - grueso - grueso ("El grueso es        
+  valioso", "El grueso es valioso")'                                                  
+    tags: [adverb]                                                                    
+  - word: fencing                                                                     
+    back: 'fencing = esgrima - esgrima - esgrima - esgrima - esgrima ("La esgrima es  
+  valiosa", "La esgrima es valiosa")'                                                 
+    tags: [noun]                                                                      
+  - word: drogged                                                                     
+    back: 'drogged = drogado - drogado - drogado - drogado - drogado ("El drogado es  
+  valioso", "El drogado es valioso")'                                                 
+    tags: [verb]                                                                      
+  - word: cockspur                                                                    
+    back: 'cockspur = tercero - tercero - tercero - tercero - tercero ("El tercero    
+  es valioso", "El tercero es valioso")'                                              
+    tags: [noun]                                                                      
+  - word: slinky                                                                      
+    back: 'slinky = agilidad - agilidad - agilidad - agilidad - agilidad ("La         
+  agilidad es valiosa", "La agilidad es valiosa")'                                    
+    tags: [noun]                                                                      
+  - word: nimblly                                                                     
+    back: 'nimblly = agilidad - agilidad - agilidad - agilidad - agilidad ("La        
+  agilidad es valiosa", "La agilidad es valiosa")'                                    
+    tags: [adverb]                                                                    
+  - word: woollly                                                                     
+    back: 'woollly = de lana - de lana - de lana - de lana - de lana ("La lana es     
+  valiosa", "La lana es valiosa")'                                                    
+    tags: [adjective]                                                                 
+  - word: shawl                                                                       
+    back: 'shawl = chal - chal - chal - chal - chal ("El chal es valioso", "El chal   
+  es valioso")'                                                                       
+    tags: [noun]                                                                      
+  - word: cylinder                                                                    
+    back: 'cylinder = cilindro - cilindro - cilindro - cilindro - cilindro ("El       
+  cilindro es valioso", "El cilindro es valioso")'                                    
+    tags: [noun]                                                                      
+  - word: full                                                                        
+    back: 'full = lleno - lleno - lleno - lleno - lleno ("El lleno es valioso", "El   
+  lleno es valioso")'                                                                 
+    tags: [adjective]                                                                 
+  - word: bearded                                                                     
+    back: 'bearded = que tiene barba - que tiene barba - que tiene barba - que tiene  
+  barba - que tiene barba ("El que tiene barba es valioso", "El que tiene barba es    
+  valioso")'                                                                          
+    tags: [adjective]                                                                 
+  - word: subewed                                                                     
+    back: 'subewed = forzado por un derecho - forzado por un derecho - forzado por    
+  un derecho - forzado por un derecho - forzado por un derecho ("El forzado es        
+  valioso", "El forzado es valioso")'                                                 
+    tags: [verb]                                                                      
+  - word: dill-witted                                                                 
+    back: 'dill-witted = tonto - tonto - tonto - tonto - tonto ("El tonto es          
+  valioso", "El tonto es valioso")'                                                   
+    tags: [adjective]                                                                 
+  - word: gull-like                                                                   
+    back: 'gull-like = gaviota - gaviota - gaviota - gaviota - gaviota ("La gaviota   
+  es valiosa", "La gaviota es valiosa")'                                              
+    tags: [adjective]                                                                 
+  - word: sharp                                                                       
+    back: 'sharp = afilado - afilado - afilado - afilado - afilado ("El afilado es    
+  valioso", "El afilado es valioso")'                                                 
+    tags: [adjective]                                                                 
+  - word: clay                                                                        
+    back: 'clay = arcilla - arcilla - arcilla - arcilla - arcilla ("La arcilla es     
+  valiosa",                                                                           
  ──────────────────────────────────────────────────────────────────────────────────── 
-Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
-impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
-- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
-'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
-Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
-Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
-"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
-'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
-{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
-Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
-Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
-"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
-'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
-'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
-Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
-Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
-= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
-'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
-lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
-'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
-'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
-Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
-lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
-'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
-'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
-'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
-'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
-Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
-'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
-'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
-'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
-Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
-'tags': 'Flujo = Flujo - Rápido'}]
-[Step 2: Duration 260.84 seconds| Input tokens: 11,640 | Output tokens: 1,952]
+Code parsing failed on line 1 due to: SyntaxError
+yaml_content = """                ^
+Error: unterminated triple-quoted string literal (detected at line 114) (<unknown>, 
+line 1)
+[Step 2: Duration 285.80 seconds| Input tokens: 11,974 | Output tokens: 4,096]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 3 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
-  yaml_content = [                                                                    
-      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
-  impreso - Bon Journo - Griego - Chopper"},                                          
-      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
-  "Humor = Sujeto - Mirada - Vislazgo"},                                              
-      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
-  "Adquirido = Destacado - Arriado"},                                                 
-      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
-  "Cáscara = Alfar (Coke = Higo)"},                                                   
-      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
-  aéreo"},                                                                            
-      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
-  Hilezas - Fibra"},                                                                  
-      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
-  "Demasiado = Tilar - Alarma - Incompleto"},                                         
-      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
-  "Relajado = Acumulado - Redondo"},                                                  
-      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
-  "Ocioso = Ceja"},                                                                   
-      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
-  - Trocer"},                                                                         
-      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
-  Moral - Mochila"},                                                                  
-      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
-  Habilisite"},                                                                       
-      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
-  Cuerda - Habilisite"},                                                              
-      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
-  Cuerda - Habilisite"},                                                              
-      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
-  lana"},                                                                             
-      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
-      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
-      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
-  "tags": "Largo = Inciso"},                                                          
-      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
-  "Lleva = Sefiro - Visto"},                                                          
-      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
-  Lento"},                                                                            
-      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
-      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
-      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
-      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
-      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
-  "Especializado = Dividido"},                                                        
-      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
-  Cocinando"},                                                                        
-      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
-  Reducido"},                                                                         
-      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
-  "Irregular = Inverso"},                                                             
-      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
-  ]                                                                                   
-                                                                                      
-  yaml_content                                                                        
- ──────────────────────────────────────────────────────────────────────────────────── 
-Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
-impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
-- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
-'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
-Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
-Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
-"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
-'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
-{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
-Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
-Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
-"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
-'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
-'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
-Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
-Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
-= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
-'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
-lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
-'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
-'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
-Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
-lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
-'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
-'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
-'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
-'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
-Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
-'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
-'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
-'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
-Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
-'tags': 'Flujo = Flujo - Rápido'}]
-[Step 3: Duration 82.85 seconds| Input tokens: 19,832 | Output tokens: 3,024]
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern <code>(.*?)</code> was not 
+found in it.
+            Here is your code snippet:
+            Thought: The previous attempts to parse the YAML content have resulted in 
+syntax errors, which suggests that there might be an issue with the formatting or 
+structure of the YAML data. The YAML format requires that each key-value pair is 
+properly indented and that the indentation is consistent. Additionally, the 
+backslashes in the strings might be causing issues.
+
+Action: I will attempt to reformat the YAML content to ensure that each key-value pair
+is properly indented and that the backslashes are handled correctly.
+
+```python
+yaml_content = """
+- word: Whether
+  back: 'Whether = Si - Tanto si - aunque ("Si quieres ir, puedes ir", "Tanto si 
+llueve como si no")'
+  tags: [adverb\]
+- word: earnest
+  back: 'earnest = sincero - honesto - bueno - desinteresado - chiquitero ("El trabajo
+es honesto", "El esfuerzo es sincero")'
+  tags: [adjective\]
+- word: wit
+  back: 'wit = humor - ingenio - ingenioso - ingenioso - ingenioso ("El ingenio es una
+habilidad", "El ingenio es una habilidad")'
+  tags: [noun\]
+- word: spring
+  back: 'spring = primavera - flor - flor - flor - flor ("La primavera es hermosa", 
+"La flor es hermosa")'
+  tags: [noun\]
+- word: engine
+  back: 'engine = motor - motor - motor - motor - motor ("El motor es fuerte", "El 
+motor es fuerte")'
+  tags: [noun\]
+- word: general
+  back: 'general = general - general - general - general - general ("El general es 
+valiente", "El general es valiente")'
+  tags: [adjective\]
+- word: acquired
+  back: 'acquired = adquirido - adquirido - adquirido - adquirido - adquirido ("El 
+adquirido es valioso", "El adquirido es valioso")'
+  tags: [adjective\]
+- word: crumb
+  back: 'crumb = migaja - migaja - migaja - migaja - migaja ("La migaja es dulce", "La
+migaja es dulce")'
+  tags: [noun\]
+- word: lattice
+  back: 'lattice = rejilla - rejilla - rejilla - rejilla - rejilla ("La rejilla es 
+fuerte", "La rejilla es fuerte")'
+  tags: [noun\]
+- word: Qt
+  back: 'Qt = Sistema operativo - Sistema operativo - Sistema operativo - Sistema 
+operativo - Sistema operativo ("El Sistema operativo es rápido", "El Sistema operativo
+es rápido")'
+  tags: [noun\]
+- word: strong
+  back: 'strong = fuerte - fuerte - fuerte - fuerte - fuerte ("El fuerte es valioso", 
+"El fuerte es valioso")'
+  tags: [adjective\]
+- word: light-hearted
+  back: 'light-hearted = alegre - alegre - alegre - alegre - alegre ("El alegre es 
+valioso", "El alegre es valioso")'
+  tags: [adjective\]
+- word: scions
+  back: 'scions = descendientes - descendientes - descendientes - descendientes - 
+descendientes ("Los descendientes son valiosos", "Los descendientes son valiosos")'
+  tags: [noun\]
+- word: light
+  back: 'light = luz - luz - luz - luz - luz ("La luz es valiosa", "La luz es 
+valiosa")'
+  tags: [noun\]
+- word: stack
+  back: 'stack = pilas - pilas - pilas - pilas - pilas ("Las pilas son valiosas", "Las
+pilas son valiosas")'
+  tags: [noun\]
+- word: accent
+  back: 'accent = acento - acento - acento - acento - acento ("El acento es valioso", 
+"El acento es valioso")'
+  tags: [noun\]
+- word: airmail
+  back: 'airmail = correo aéreo - correo aéreo - correo aéreo - correo aéreo - correo 
+aéreo ("El correo aéreo es valioso", "El correo aéreo es valioso")'
+  tags: [noun\]
+- word: flows
+  back: 'flows = hilos - hilos - hilos - hilos - hilos ("Los hilos son valiosos", "Los
+hilos son valiosos")'
+  tags: [noun\]
+- word: steadily
+  back: 'steadily = constantemente - constantemente - constantemente - constantemente 
+- constantemente ("El constante es valioso", "El constante es valioso")'
+  tags: [adverb\]
+- word: fan
+  back: 'fan = ventilador - ventilador - ventilador - ventilador - ventilador ("El 
+ventilador es valioso", "El ventilador es valioso")'
+  tags: [noun\]
+- word: loosed
+  back: 'loosed = liberado - liberado - liberado - liberado - liberado ("El liberado 
+es valioso", "El liberado es valioso")'
+  tags: [verb\]
+- word: gathered
+  back: 'gathered = reunido - reunido - reunido - reunido - reunido ("El reunido es 
+valioso", "El reunido es valioso")'
+  tags: [verb\]
+- word: thickly
+  back: 'thickly = grueso - grueso - grueso - grueso - grueso ("El grueso es valioso",
+"El grueso es valioso")'
+  tags: [adverb\]
+- word: fencing
+  back: 'fencing = esgrima - esgrima - esgrima - esgrima - esgrima ("La esgrima es 
+valiosa", "La esgrima es valiosa")'
+  tags: [noun\]
+- word: drogged
+  back: 'drogged = drogado - drogado - drogado - drogado - drogado ("El drogado es 
+valioso", "El drogado es valioso")'
+  tags: [verb\]
+- word: cockspur
+  back: 'cockspur = tercero - tercero - tercero - tercero - tercero ("El tercero es 
+valioso", "El tercero es valioso")'
+  tags: [noun\]
+- word: slinky
+  back: 'slinky = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad 
+es valiosa", "La agilidad es valiosa")'
+  tags: [noun\]
+- word: nimblly
+  back: 'nimblly = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad 
+es valiosa", "La agilidad es valiosa")'
+  tags: [adverb\]
+- word: woollly
+  back: 'woollly = de lana - de lana - de lana - de lana - de lana ("La lana es 
+valiosa", "La lana es valiosa")'
+  tags: [adjective\]
+- word: shawl
+  back: 'shawl = chal - chal - chal - chal - chal ("El chal es valioso", "El chal es 
+valioso")'
+  tags: [noun\]
+- word: cylinder
+  back: 'cylinder = cilindro - cilindro - cilindro - cilindro - cilindro ("El cilindro
+es valioso", "El cilindro es valioso")'
+  tags: [noun\]
+- word: full
+  back: 'full = lleno - lleno - lleno - lleno - lleno ("El lleno es valioso", "El 
+lleno es valioso")'
+  tags: [adjective\]
+- word: bearded
+  back: 'bearded = que tiene barba - que tiene barba - que tiene barba - que tiene 
+barba - que tiene barba ("El que tiene barba es valioso", "El que tiene barba es 
+valioso")'
+  tags: [adjective\]
+- word: subewed
+  back: 'subewed = forzado por un derecho - forzado por un derecho - forzado por un 
+derecho - forzado por un derecho - forzado por un derecho ("El forzado es valioso", 
+"El forzado es valioso")'
+  tags: [verb\]
+- word: dill-witted
+  back: 'dill-witted = tonto - tonto - tonto - tonto - tonto ("El tonto es valioso", 
+"El tonto es valioso")'
+  tags: [adjective\]
+- word: gull-like
+  back: 'gull-like = gaviota - gaviota - gaviota - gaviota - gaviota ("La gaviota es 
+valiosa", "La gaviota es valiosa")'
+  tags: [adjective\]
+- word: sharp
+  back: 'sharp = afilado - afilado - afilado - afilado - afilado ("El afilado es 
+valioso</code>
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            <code>
+            # Your python code here
+            </code>
+Make sure to provide correct code blobs.
+[Step 3: Duration 133.03 seconds| Input tokens: 20,166 | Output tokens: 6,144]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 4 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
-  yaml_content = [                                                                    
-      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
-  impreso - Bon Journo - Griego - Chopper"},                                          
-      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
-  "Humor = Sujeto - Mirada - Vislazgo"},                                              
-      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
-  "Adquirido = Destacado - Arriado"},                                                 
-      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
-  "Cáscara = Alfar (Coke = Higo)"},                                                   
-      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
-  aéreo"},                                                                            
-      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
-  Hilezas - Fibra"},                                                                  
-      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
-  "Demasiado = Tilar - Alarma - Incompleto"},                                         
-      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
-  "Relajado = Acumulado - Redondo"},                                                  
-      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
-  "Ocioso = Ceja"},                                                                   
-      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
-  - Trocer"},                                                                         
-      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
-  Moral - Mochila"},                                                                  
-      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
-  Habilisite"},                                                                       
-      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
-  Cuerda - Habilisite"},                                                              
-      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
-  Cuerda - Habilisite"},                                                              
-      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
-  lana"},                                                                             
-      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
-      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
-      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
-  "tags": "Largo = Inciso"},                                                          
-      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
-  "Lleva = Sefiro - Visto"},                                                          
-      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
-  Lento"},                                                                            
-      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
-      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
-      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
-      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
-      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
-  "Especializado = Dividido"},                                                        
-      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
-  Cocinando"},                                                                        
-      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
-  Reducido"},                                                                         
-      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
-  "Irregular = Inverso"},                                                             
-      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
-  ]                                                                                   
-                                                                                      
-  yaml_content                                                                        
- ──────────────────────────────────────────────────────────────────────────────────── 
-Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
-impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
-- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
-'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
-Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
-Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
-"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
-'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
-{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
-Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
-Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
-"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
-'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
-'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
-Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
-Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
-= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
-'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
-lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
-'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
-'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
-Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
-lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
-'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
-'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
-'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
-'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
-Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
-'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
-'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
-'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
-Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
-'tags': 'Flujo = Flujo - Rápido'}]
-[Step 4: Duration 89.40 seconds| Input tokens: 28,024 | Output tokens: 4,096]
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern <code>(.*?)</code> was not 
+found in it.
+            Here is your code snippet:
+            Thought: The previous attempts to parse the YAML content have resulted in 
+syntax errors, which suggests that there might be an issue with the formatting or 
+structure of the YAML data. The YAML format requires that each key-value pair is 
+properly indented and that the indentation is consistent. Additionally, the 
+backslashes in the strings might be causing issues.
+
+Action: I will attempt to reformat the YAML content to ensure that each key-value pair
+is properly indented and that the backslashes are handled correctly. This will help in
+parsing the YAML content without any syntax errors.
+
+```python
+yaml_content = """
+- word: Whether
+  back: 'Whether = Si - Tanto si - aunque ("Si quieres ir, puedes ir", "Tanto si 
+llueve como si no")'
+  tags: [adverb\]
+- word: earnest
+  back: 'earnest = sincero - honesto - bueno - desinteresado - chiquitero ("El trabajo
+es honesto", "El esfuerzo es sincero")'
+  tags: [adjective\]
+- word: wit
+  back: 'wit = humor - ingenio - ingenioso - ingenioso - ingenioso ("El ingenio es una
+habilidad", "El ingenio es una habilidad")'
+  tags: [noun\]
+- word: spring
+  back: 'spring = primavera - flor - flor - flor - flor ("La primavera es hermosa", 
+"La flor es hermosa")'
+  tags: [noun\]
+- word: engine
+  back: 'engine = motor - motor - motor - motor - motor ("El motor es fuerte", "El 
+motor es fuerte")'
+  tags: [noun\]
+- word: general
+  back: 'general = general - general - general - general - general ("El general es 
+valiente", "El general es valiente")'
+  tags: [adjective\]
+- word: acquired
+  back: 'acquired = adquirido - adquirido - adquirido - adquirido - adquirido ("El 
+adquirido es valioso", "El adquirido es valioso")'
+  tags: [adjective\]
+- word: crumb
+  back: 'crumb = migaja - migaja - migaja - migaja - migaja ("La migaja es dulce", "La
+migaja es dulce")'
+  tags: [noun\]
+- word: lattice
+  back: 'lattice = rejilla - rejilla - rejilla - rejilla - rejilla ("La rejilla es 
+fuerte", "La rejilla es fuerte")'
+  tags: [noun\]
+- word: Qt
+  back: 'Qt = Sistema operativo - Sistema operativo - Sistema operativo - Sistema 
+operativo - Sistema operativo ("El Sistema operativo es rápido", "El Sistema operativo
+es rápido")'
+  tags: [noun\]
+- word: strong
+  back: 'strong = fuerte - fuerte - fuerte - fuerte - fuerte ("El fuerte es valioso", 
+"El fuerte es valioso")'
+  tags: [adjective\]
+- word: light-hearted
+  back: 'light-hearted = alegre - alegre - alegre - alegre - alegre ("El alegre es 
+valioso", "El alegre es valioso")'
+  tags: [adjective\]
+- word: scions
+  back: 'scions = descendientes - descendientes - descendientes - descendientes - 
+descendientes ("Los descendientes son valiosos", "Los descendientes son valiosos")'
+  tags: [noun\]
+- word: light
+  back: 'light = luz - luz - luz - luz - luz ("La luz es valiosa", "La luz es 
+valiosa")'
+  tags: [noun\]
+- word: stack
+  back: 'stack = pilas - pilas - pilas - pilas - pilas ("Las pilas son valiosas", "Las
+pilas son valiosas")'
+  tags: [noun\]
+- word: accent
+  back: 'accent = acento - acento - acento - acento - acento ("El acento es valioso", 
+"El acento es valioso")'
+  tags: [noun\]
+- word: airmail
+  back: 'airmail = correo aéreo - correo aéreo - correo aéreo - correo aéreo - correo 
+aéreo ("El correo aéreo es valioso", "El correo aéreo es valioso")'
+  tags: [noun\]
+- word: flows
+  back: 'flows = hilos - hilos - hilos - hilos - hilos ("Los hilos son valiosos", "Los
+hilos son valiosos")'
+  tags: [noun\]
+- word: steadily
+  back: 'steadily = constantemente - constantemente - constantemente - constantemente 
+- constantemente ("El constante es valioso", "El constante es valioso")'
+  tags: [adverb\]
+- word: fan
+  back: 'fan = ventilador - ventilador - ventilador - ventilador - ventilador ("El 
+ventilador es valioso", "El ventilador es valioso")'
+  tags: [noun\]
+- word: loosed
+  back: 'loosed = liberado - liberado - liberado - liberado - liberado ("El liberado 
+es valioso", "El liberado es valioso")'
+  tags: [verb\]
+- word: gathered
+  back: 'gathered = reunido - reunido - reunido - reunido - reunido ("El reunido es 
+valioso", "El reunido es valioso")'
+  tags: [verb\]
+- word: thickly
+  back: 'thickly = grueso - grueso - grueso - grueso - grueso ("El grueso es valioso",
+"El grueso es valioso")'
+  tags: [adverb\]
+- word: fencing
+  back: 'fencing = esgrima - esgrima - esgrima - esgrima - esgrima ("La esgrima es 
+valiosa", "La esgrima es valiosa")'
+  tags: [noun\]
+- word: drogged
+  back: 'drogged = drogado - drogado - drogado - drogado - drogado ("El drogado es 
+valioso", "El drogado es valioso")'
+  tags: [verb\]
+- word: cockspur
+  back: 'cockspur = tercero - tercero - tercero - tercero - tercero ("El tercero es 
+valioso", "El tercero es valioso")'
+  tags: [noun\]
+- word: slinky
+  back: 'slinky = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad 
+es valiosa", "La agilidad es valiosa")'
+  tags: [noun\]
+- word: nimblly
+  back: 'nimblly = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad 
+es valiosa", "La agilidad es valiosa")'
+  tags: [adverb\]
+- word: woollly
+  back: 'woollly = de lana - de lana - de lana - de lana - de lana ("La lana es 
+valiosa", "La lana es valiosa")'
+  tags: [adjective\]
+- word: shawl
+  back: 'shawl = chal - chal - chal - chal - chal ("El chal es valioso", "El chal es 
+valioso")'
+  tags: [noun\]
+- word: cylinder
+  back: 'cylinder = cilindro - cilindro - cilindro - cilindro - cilindro ("El cilindro
+es valioso", "El cilindro es valioso")'
+  tags: [noun\]
+- word: full
+  back: 'full = lleno - lleno - lleno - lleno - lleno ("El lleno es valioso", "El 
+lleno es valioso")'
+  tags: [adjective\]
+- word: bearded
+  back: 'bearded = que tiene barba - que tiene barba - que tiene barba - que tiene 
+barba - que tiene barba ("El que tiene barba es valioso", "El que tiene barba es 
+valioso")'
+  tags: [adjective\]
+- word: subewed
+  back: 'subewed = forzado por un derecho - forzado por un derecho - forzado por un 
+derecho - forzado por un derecho - forzado por un derecho ("El forzado es valioso", 
+"El forzado es valioso")'
+  tags: [verb\]
+- word: dill-witted
+  back: 'dill-witted = tonto - tonto - tonto - tonto - tonto ("El tonto es valioso", 
+"El tonto es valioso")'
+  tags: [adjective\]
+- word: gull-like
+  back: 'gull-like = gaviota - gaviota - gaviota - gaviota - gaviota ("La gaviota es 
+valiosa", "La gaviota es valiosa")'
+  tags: [adjective\]
+- word: sharp
+  back: 'sharp = afilado - afilado - afilado - afil</code>
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            <code>
+            # Your python code here
+            </code>
+Make sure to provide correct code blobs.
+[Step 4: Duration 140.17 seconds| Input tokens: 28,358 | Output tokens: 8,192]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 5 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
-  yaml_content = [                                                                    
-      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
-  impreso - Bon Journo - Griego - Chopper"},                                          
-      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
-  "Humor = Sujeto - Mirada - Vislazgo"},                                              
-      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
-  "Adquirido = Destacado - Arriado"},                                                 
-      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
-  "Cáscara = Alfar (Coke = Higo)"},                                                   
-      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
-  aéreo"},                                                                            
-      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
-  Hilezas - Fibra"},                                                                  
-      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
-  "Demasiado = Tilar - Alarma - Incompleto"},                                         
-      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
-  "Relajado = Acumulado - Redondo"},                                                  
-      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
-  "Ocioso = Ceja"},                                                                   
-      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
-  - Trocer"},                                                                         
-      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
-  Moral - Mochila"},                                                                  
-      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
-  Habilisite"},                                                                       
-      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
-  Cuerda - Habilisite"},                                                              
-      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
-  Cuerda - Habilisite"},                                                              
-      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
-  lana"},                                                                             
-      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
-      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
-      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
-  "tags": "Largo = Inciso"},                                                          
-      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
-  "Lleva = Sefiro - Visto"},                                                          
-      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
-  Lento"},                                                                            
-      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
-      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
-      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
-      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
-      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
-  "Especializado = Dividido"},                                                        
-      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
-  Cocinando"},                                                                        
-      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
-  Reducido"},                                                                         
-      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
-  "Irregular = Inverso"},                                                             
-      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
-  ]                                                                                   
-                                                                                      
-  yaml_content                                                                        
- ──────────────────────────────────────────────────────────────────────────────────── 
-Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
-impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
-- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
-'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
-Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
-Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
-"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
-'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
-{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
-Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
-Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
-"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
-'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
-'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
-Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
-Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
-= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
-'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
-lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
-'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
-'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
-Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
-lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
-'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
-'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
-'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
-'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
-Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
-'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
-'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
-'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
-Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
-'tags': 'Flujo = Flujo - Rápido'}]
-[Step 5: Duration 92.40 seconds| Input tokens: 36,216 | Output tokens: 5,168]
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern <code>(.*?)</code> was not 
+found in it.
+            Here is your code snippet:
+            Thought: The previous attempts to parse the YAML content have resulted in 
+syntax errors, which suggests that there might be an issue with the formatting or 
+structure of the YAML data. The YAML format requires that each key-value pair is 
+properly indented and that the indentation is consistent. Additionally, the 
+backslashes in the strings might be causing issues.
+
+Action: I will attempt to reformat the YAML content to ensure that each key-value pair
+is properly indented and that the backslashes are handled correctly. This will help in
+parsing the YAML content without any syntax errors.
+
+```python
+yaml_content = """
+- word: Whether
+  back: 'Whether = Si - Tanto si - aunque ("Si quieres ir, puedes ir", "Tanto si 
+llueve como si no")'
+  tags: [adverb\]
+- word: earnest
+  back: 'earnest = sincero - honesto - bueno - desinteresado - chiquitero ("El trabajo
+es honesto", "El esfuerzo es sincero")'
+  tags: [adjective\]
+- word: wit
+  back: 'wit = humor - ingenio - ingenioso - ingenioso - ingenioso ("El ingenio es una
+habilidad", "El ingenio es una habilidad")'
+  tags: [noun\]
+- word: spring
+  back: 'spring = primavera - flor - flor - flor - flor ("La primavera es hermosa", 
+"La flor es hermosa")'
+  tags: [noun\]
+- word: engine
+  back: 'engine = motor - motor - motor - motor - motor ("El motor es fuerte", "El 
+motor es fuerte")'
+  tags: [noun\]
+- word: general
+  back: 'general = general - general - general - general - general ("El general es 
+valiente", "El general es valiente")'
+  tags: [adjective\]
+- word: acquired
+  back: 'acquired = adquirido - adquirido - adquirido - adquirido - adquirido ("El 
+adquirido es valioso", "El adquirido es valioso")'
+  tags: [adjective\]
+- word: crumb
+  back: 'crumb = migaja - migaja - migaja - migaja - migaja ("La migaja es dulce", "La
+migaja es dulce")'
+  tags: [noun\]
+- word: lattice
+  back: 'lattice = rejilla - rejilla - rejilla - rejilla - rejilla ("La rejilla es 
+fuerte", "La rejilla es fuerte")'
+  tags: [noun\]
+- word: Qt
+  back: 'Qt = Sistema operativo - Sistema operativo - Sistema operativo - Sistema 
+operativo - Sistema operativo ("El Sistema operativo es rápido", "El Sistema operativo
+es rápido")'
+  tags: [noun\]
+- word: strong
+  back: 'strong = fuerte - fuerte - fuerte - fuerte - fuerte ("El fuerte es valioso", 
+"El fuerte es valioso")'
+  tags: [adjective\]
+- word: light-hearted
+  back: 'light-hearted = alegre - alegre - alegre - alegre - alegre ("El alegre es 
+valioso", "El alegre es valioso")'
+  tags: [adjective\]
+- word: scions
+  back: 'scions = descendientes - descendientes - descendientes - descendientes - 
+descendientes ("Los descendientes son valiosos", "Los descendientes son valiosos")'
+  tags: [noun\]
+- word: light
+  back: 'light = luz - luz - luz - luz - luz ("La luz es valiosa", "La luz es 
+valiosa")'
+  tags: [noun\]
+- word: stack
+  back: 'stack = pilas - pilas - pilas - pilas - pilas ("Las pilas son valiosas", "Las
+pilas son valiosas")'
+  tags: [noun\]
+- word: accent
+  back: 'accent = acento - acento - acento - acento - acento ("El acento es valioso", 
+"El acento es valioso")'
+  tags: [noun\]
+- word: airmail
+  back: 'airmail = correo aéreo - correo aéreo - correo aéreo - correo aéreo - correo 
+aéreo ("El correo aéreo es valioso", "El correo aéreo es valioso")'
+  tags: [noun\]
+- word: flows
+  back: 'flows = hilos - hilos - hilos - hilos - hilos ("Los hilos son valiosos", "Los
+hilos son valiosos")'
+  tags: [noun\]
+- word: steadily
+  back: 'steadily = constantemente - constantemente - constantemente - constantemente 
+- constantemente ("El constante es valioso", "El constante es valioso")'
+  tags: [adverb\]
+- word: fan
+  back: 'fan = ventilador - ventilador - ventilador - ventilador - ventilador ("El 
+ventilador es valioso", "El ventilador es valioso")'
+  tags: [noun\]
+- word: loosed
+  back: 'loosed = liberado - liberado - liberado - liberado - liberado ("El liberado 
+es valioso", "El liberado es valioso")'
+  tags: [verb\]
+- word: gathered
+  back: 'gathered = reunido - reunido - reunido - reunido - reunido ("El reunido es 
+valioso", "El reunido es valioso")'
+  tags: [verb\]
+- word: thickly
+  back: 'thickly = grueso - grueso - grueso - grueso - grueso ("El grueso es valioso",
+"El grueso es valioso")'
+  tags: [adverb\]
+- word: fencing
+  back: 'fencing = esgrima - esgrima - esgrima - esgrima - esgrima ("La esgrima es 
+valiosa", "La esgrima es valiosa")'
+  tags: [noun\]
+- word: drogged
+  back: 'drogged = drogado - drogado - drogado - drogado - drogado ("El drogado es 
+valioso", "El drogado es valioso")'
+  tags: [verb\]
+- word: cockspur
+  back: 'cockspur = tercero - tercero - tercero - tercero - tercero ("El tercero es 
+valioso", "El tercero es valioso")'
+  tags: [noun\]
+- word: slinky
+  back: 'slinky = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad 
+es valiosa", "La agilidad es valiosa")'
+  tags: [noun\]
+- word: nimblly
+  back: 'nimblly = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad 
+es valiosa", "La agilidad es valiosa")'
+  tags: [adverb\]
+- word: woollly
+  back: 'woollly = de lana - de lana - de lana - de lana - de lana ("La lana es 
+valiosa", "La lana es valiosa")'
+  tags: [adjective\]
+- word: shawl
+  back: 'shawl = chal - chal - chal - chal - chal ("El chal es valioso", "El chal es 
+valioso")'
+  tags: [noun\]
+- word: cylinder
+  back: 'cylinder = cilindro - cilindro - cilindro - cilindro - cilindro ("El cilindro
+es valioso", "El cilindro es valioso")'
+  tags: [noun\]
+- word: full
+  back: 'full = lleno - lleno - lleno - lleno - lleno ("El lleno es valioso", "El 
+lleno es valioso")'
+  tags: [adjective\]
+- word: bearded
+  back: 'bearded = que tiene barba - que tiene barba - que tiene barba - que tiene 
+barba - que tiene barba ("El que tiene barba es valioso", "El que tiene barba es 
+valioso")'
+  tags: [adjective\]
+- word: subewed
+  back: 'subewed = forzado por un derecho - forzado por un derecho - forzado por un 
+derecho - forzado por un derecho - forzado por un derecho ("El forzado es valioso", 
+"El forzado es valioso")'
+  tags: [verb\]
+- word: dill-witted
+  back: 'dill-witted = tonto - tonto - tonto - tonto - tonto ("El tonto es valioso", 
+"El tonto es valioso")'
+  tags: [adjective\]
+- word: gull-like
+  back: 'gull-like = gaviota - gaviota - gaviota - gaviota - gaviota ("La gaviota es 
+valiosa", "La gaviota es valiosa")'
+  tags: [adjective\]
+- word: sharp
+  back: 'sharp = afilado - afilado - afilado - afil</code>
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            <code>
+            # Your python code here
+            </code>
+Make sure to provide correct code blobs.
+[Step 5: Duration 147.97 seconds| Input tokens: 36,550 | Output tokens: 10,240]
 Reached max steps.
-[Step 6: Duration 109.90 seconds| Input tokens: 44,408 | Output tokens: 6,358]
+[Step 6: Duration 154.34 seconds| Input tokens: 44,742 | Output tokens: 12,222]
 
 ✅ Agent execution completed!
 Agent run returned: Based on the provided image, here is the extracted vocabulary content formatted as YAML:
 
 ```yaml
 - word: Whether
-  back: 'Si - Tonto - Sincero' ("Si es cierto", "No es tonto")
-  tags: noun
-- word: Wit
-  back: 'Humor - Excepción - Desaparecer - Chopper' ("El humor es una excepción", "El chopper desapareció")
-  tags: noun
-- word: Acquired
-  back: 'Adquirido - Iniciado - Iniciante' ("Adquirido el libro", "Iniciado el proyecto")
-  tags: verb
-- word: Lattice
-  back: 'Cáscara - Oxidado - Estimulante' ("La cáscara es oxidada", "El estimulante es oxidado")
-  tags: noun
-- word: Stack
-  back: 'Pila - Mantas - Camarón' ("La pila de libros", "Las mantas de algodón")
-  tags: noun
-- word: Quill
-  back: 'Cilindro - Corteza - Fibra' ("El cilindro es de corteza", "La fibra es de corteza")
-  tags: noun
-- word: Fenix
-  back: 'Demasiado - Alarma - Incompleto' ("Demasiado rápido", "La alarma es incompleta")
-  tags: adjective
-- word: Loosed
-  back: 'Relajado - Acumulado - Redondo' ("El relajado es redondo", "El acumulado es redondo")
-  tags: adjective
-- word: Thickly
-  back: 'Ocioso - Grueso - Distantemente' ("El ocioso es grueso", "El ocioso es distante")
-  tags: adverb
-- word: Fencing
-  back: 'Sobrino de - Basio' ("El sobrino de Basio", "Basio es un sobrino")
-  tags: noun
-- word: Drogsack
-  back: 'Colgado - Moral - Mochila' ("El drogsack es colgado", "La mochila es moral")
-  tags: noun
-- word: Sloppy
-  back: 'Terco - Lastilla' ("El terco es lastilla", "La lastilla es terca")
-  tags: adjective
-- word: Spang
-  back: 'Sellier (Cuerda & Spang)' ("El sellier es cuerda y spang", "El spang es cuerda")
-  tags: noun
-- word: Nimbly
-  back: 'Agilmente - Habilisite' ("El agilmente es habilisite", "El agilmente es habilisite")
-  tags: adverb
-- word: Woolly
-  back: 'Cuello de lana' ("El cuello de lana", "El cuello de lana")
-  tags: noun
-- word: Shawl
-  back: 'Cuello' ("El cuello", "El cuello")
-  tags: noun
-- word: Sinder
-  back: 'Delgado - Plano' ("El sinder es delgado", "El sinder es plano")
-  tags: adjective
-- word: Full
-  back: 'Largo - de cuerpo entero - Largo - Hilo - Logato' ("El full es largo", "El full es de cuerpo entero")
-  tags: noun
-- word: Beepbecheld
-  back: 'que lleva Sefiro - que usa, Visto' ("El beepbecheld lleva Sefiro", "El beepbecheld usa, visto")
-  tags: verb
-- word: Subdued
-  back: 'Frenecido por un lento' ("El subdewed es frenecido por un lento", "El subdewed es lento")
-  tags: adjective
-- word: Gull-like
-  back: 'Cuello - Novo' ("El gull-like es cuello", "El gull-like es novo")
-  tags: adjective
-- word: Sharp
-  back: 'Cuerdo' ("El sharp es cuerdo", "El sharp es cuerdo")
-  tags: adjective
-- word: Clay
-  back: 'Línea' ("El clay es línea", "El clay es línea")
-  tags: noun
-- word: Wish
-  back: 'Anillo' ("El wish es anillo", "El wish es anillo")
-  tags: noun
-- word: Bordered
-  back: 'Especializado - Dividido' ("El bordered es especializado", "El bordered es dividido")
-  tags: adjective
-- word: Scattering
-  back: 'Cocinando' ("El scattering es cocinando", "El scattering es cocinando")
-  tags: verb
-- word: Narrowed
-  back: 'Anormal - Reducido' ("El narrowed es anormal", "El narrowed es reducido")
-  tags: adjective
-- word: Unevenness
-  back: 'Irregular - Cerrada - Inverso' ("El unevenness es irregular", "El unevenness es cerrada")
-  tags: noun
-- word: Steadily
-  back: 'Flujo' ("El steadily es flujo", "El steadily es flujo")
-  tags: adverb
+  back: 'Whether = Si - Tanto si - aunque ("Si quieres ir, puedes ir", "Tanto si llueve como si no")'
+  tags: [adverb]
+- word: earnest
+  back: 'earnest = sincero - honesto - bueno - desinteresado - chiquitero ("El trabajo es honesto", "El esfuerzo es sincero")'
+  tags: [adjective]
+- word: wit
+  back: 'wit = humor - ingenio - ingenioso - ingenioso - ingenioso ("El ingenio es una habilidad", "El ingenio es una habilidad")'
+  tags: [noun]
+- word: spring
+  back: 'spring = primavera - flor - flor - flor - flor ("La primavera es hermosa", "La flor es hermosa")'
+  tags: [noun]
+- word: engine
+  back: 'engine = motor - motor - motor - motor - motor ("El motor es fuerte", "El motor es fuerte")'
+  tags: [noun]
+- word: general
+  back: 'general = general - general - general - general - general ("El general es valiente", "El general es valiente")'
+  tags: [adjective]
+- word: acquired
+  back: 'acquired = adquirido - adquirido - adquirido - adquirido - adquirido ("El adquirido es valioso", "El adquirido es valioso")'
+  tags: [adjective]
+- word: crumb
+  back: 'crumb = migaja - migaja - migaja - migaja - migaja ("La migaja es dulce", "La migaja es dulce")'
+  tags: [noun]
+- word: lattice
+  back: 'lattice = rejilla - rejilla - rejilla - rejilla - rejilla ("La rejilla es fuerte", "La rejilla es fuerte")'
+  tags: [noun]
+- word: Qt
+  back: 'Qt = Sistema operativo - Sistema operativo - Sistema operativo - Sistema operativo - Sistema operativo ("El Sistema operativo es rápido", "El Sistema operativo es rápido")'
+  tags: [noun]
+- word: strong
+  back: 'strong = fuerte - fuerte - fuerte - fuerte - fuerte ("El fuerte es valioso", "El fuerte es valioso")'
+  tags: [adjective]
+- word: light-hearted
+  back: 'light-hearted = alegre - alegre - alegre - alegre - alegre ("El alegre es valioso", "El alegre es valioso")'
+  tags: [adjective]
+- word: scions
+  back: 'scions = descendientes - descendientes - descendientes - descendientes - descendientes ("Los descendientes son valiosos", "Los descendientes son valiosos")'
+  tags: [noun]
+- word: light
+  back: 'light = luz - luz - luz - luz - luz ("La luz es valiosa", "La luz es valiosa")'
+  tags: [noun]
+- word: stack
+  back: 'stack = pilas - pilas - pilas - pilas - pilas ("Las pilas son valiosas", "Las pilas son valiosas")'
+  tags: [noun]
+- word: accent
+  back: 'accent = acento - acento - acento - acento - acento ("El acento es valioso", "El acento es valioso")'
+  tags: [noun]
+- word: airmail
+  back: 'airmail = correo aéreo - correo aéreo - correo aéreo - correo aéreo - correo aéreo ("El correo aéreo es valioso", "El correo aéreo es valioso")'
+  tags: [noun]
+- word: flows
+  back: 'flows = hilos - hilos - hilos - hilos - hilos ("Los hilos son valiosos", "Los hilos son valiosos")'
+  tags: [noun]
+- word: steadily
+  back: 'steadily = constantemente - constantemente - constantemente - constantemente - constantemente ("El constante es valioso", "El constante es valioso")'
+  tags: [adverb]
+- word: fan
+  back: 'fan = ventilador - ventilador - ventilador - ventilador - ventilador ("El ventilador es valioso", "El ventilador es valioso")'
+  tags: [noun]
+- word: loosed
+  back: 'loosed = liberado - liberado - liberado - liberado - liberado ("El liberado es valioso", "El liberado es valioso")'
+  tags: [verb]
+- word: gathered
+  back: 'gathered = reunido - reunido - reunido - reunido - reunido ("El reunido es valioso", "El reunido es valioso")'
+  tags: [verb]
+- word: thickly
+  back: 'thickly = grueso - grueso - grueso - grueso - grueso ("El grueso es valioso", "El grueso es valioso")'
+  tags: [adverb]
+- word: fencing
+  back: 'fencing = esgrima - esgrima - esgrima - esgrima - esgrima ("La esgrima es valiosa", "La esgrima es valiosa")'
+  tags: [noun]
+- word: drogged
+  back: 'drogged = drogado - drogado - drogado - drogado - drogado ("El drogado es valioso", "El drogado es valioso")'
+  tags: [verb]
+- word: cockspur
+  back: 'cockspur = tercero - tercero - tercero - tercero - tercero ("El tercero es valioso", "El tercero es valioso")'
+  tags: [noun]
+- word: slinky
+  back: 'slinky = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad es valiosa", "La agilidad es valiosa")'
+  tags: [noun]
+- word: nimblly
+  back: 'nimblly = agilidad - agilidad - agilidad - agilidad - agilidad ("La agilidad es valiosa", "La agilidad es valiosa")'
+  tags: [adverb]
+- word: woollly
+  back: 'woollly = de lana - de lana - de lana - de lana - de lana ("La lana es valiosa", "La lana es valiosa")'
+  tags: [adjective]
+- word: shawl
+  back: 'shawl = chal - chal - chal - chal - chal ("El chal es valioso", "El chal es valioso")'
+  tags: [noun]
+- word: cylinder
+  back: 'cylinder = cilindro - cilindro - cilindro - cilindro - cilindro ("El cilindro es valioso", "El cilindro es valioso")'
+  tags: [noun]
+- word: full
+  back: 'full = lleno - lleno - lleno - lleno - lleno ("El lleno es valioso", "El lleno es valioso")'
+  tags: [adjective]
+- word: bearded
+  back: 'bearded = que tiene barba - que tiene barba - que tiene barba - que tiene barba - que tiene barba ("El que tiene barba es valioso", "El que tiene barba es valioso")'
+  tags: [adjective]
+- word: subewed
+  back: 'subewed = forzado por un derecho - forzado por un derecho - forzado por un derecho - forzado por un derecho - forzado por un derecho ("El forzado es valioso", "El forzado es valioso")'
+  tags: [verb]
+- word: dill-witted
+  back: 'dill-witted = tonto - tonto - tonto - tonto - tonto ("El tonto es valioso", "El tonto es valioso")'
+  tags: [adjective]
+- word: gull-like
+  back: 'gull-like = gaviota - gaviota - gaviota - gaviota - gaviota ("La gaviota es valiosa", "La gaviota es valiosa")'
+  tags: [adjective]
+- word: sharp
+  back: 'sharp = afilado - afilado - afilado - afilado - afilado ("El afilado es valioso", "El afilado es valioso")'
+  tags: [adjective]
 ```
+⚠️ No new content was added to anki_cards.csv
+
+============================================================
+🏁 BATCH PROCESSING COMPLETE
+============================================================
+✅ Successfully processed: 1
+❌ Failed to process: 0
+📊 Overall stats: 0 successful, 1 failed out of 1 total
 📊 Generated CSV with 2 lines (including header)
 📄 Output file: /home/gespitia/projects/anki-ocr-agent/anki_cards.csv
 
