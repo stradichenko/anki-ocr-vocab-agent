@@ -21,12 +21,14 @@ from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
 
 from core.agent_factory import create_vocab_agent
+from core.image_config import DEFAULT_CONFIG, QUALITY_CONFIG, FAST_CONFIG, OCR_OPTIMIZED_CONFIG
 from utils.testing import (
     run_comprehensive_self_test,
     safe_tool_name,
     print_agent_debug_info,
     analyze_csv_output,
 )
+from utils.image_preprocessing import preprocess_image_for_ocr, get_preprocessing_stats
 from tools import yaml_to_anki, file_reader, file_writer
 
 
@@ -173,16 +175,38 @@ def process_vocab_image(image_path: str, tracker: ImageProcessingTracker):
                 print("Could not display agent.tools:", e)
                 traceback.print_exc()
 
-        # Load image using PIL for smolagents
-        print(f"📖 Loading image file: {image_path}")
+        # Load and preprocess image
+        print(f"📖 Loading and preprocessing image: {image_path}")
         try:
-            image = Image.open(image_path)
-            print(f"✅ Image loaded: {image.size} pixels, mode: {image.mode}")
+            # Apply image preprocessing
+            print("🔧 Applying image preprocessing pipeline...")
+            processed_image, processing_summary = preprocess_image_for_ocr(image_path, OCR_OPTIMIZED_CONFIG)
+            
+            # Get preprocessing statistics
+            stats = get_preprocessing_stats(image_path, processed_image, OCR_OPTIMIZED_CONFIG)
+            print(f"📊 Preprocessing stats:")
+            print(f"   Original: {stats['original_dimensions']} ({stats['original_file_size']} bytes)")
+            print(f"   Processed: {stats['processed_dimensions']} ({stats['processed_file_size']} bytes)")
+            print(f"   Size reduction: {stats['size_reduction_percent']:.1f}%")
+            print(f"   Resolution reduction: {stats['dimension_reduction_percent']:.1f}%")
+            print(f"📝 Processing steps: {processing_summary}")
+            
+            print(f"✅ Image preprocessed: {processed_image.size} pixels, mode: {processed_image.mode}")
         except Exception as e:
-            error_msg = f"Failed to load image: {e}"
+            error_msg = f"Failed to preprocess image: {e}"
             print(f"❌ {error_msg}")
-            tracker.mark_processed(image_path, success=False, error_msg=error_msg)
-            return None
+            print("🔄 Falling back to original image...")
+            traceback.print_exc()
+            
+            # Fallback to original image
+            try:
+                processed_image = Image.open(image_path)
+                print(f"✅ Fallback image loaded: {processed_image.size} pixels, mode: {processed_image.mode}")
+            except Exception as fallback_error:
+                error_msg = f"Failed to load original image: {fallback_error}"
+                print(f"❌ {error_msg}")
+                tracker.mark_processed(image_path, success=False, error_msg=error_msg)
+                return None
 
         # Construct message for vision processing - improved to avoid syntax errors
         user_message = (
@@ -234,7 +258,7 @@ def process_vocab_image(image_path: str, tracker: ImageProcessingTracker):
         )
 
         print("\n🚀 Starting agent execution with vision...")
-        print("📊 Using smolagents native image support...")
+        print("📊 Using smolagents native image support with preprocessed image...")
         
         # Store original CSV state to check if new content was added
         csv_path = "output/anki_cards.csv"
@@ -244,8 +268,8 @@ def process_vocab_image(image_path: str, tracker: ImageProcessingTracker):
                 original_csv_content = f.read()
         
         try:
-            # Use smolagents native vision support with images parameter
-            result = agent.run(user_message, images=[image])
+            # Use smolagents native vision support with preprocessed image
+            result = agent.run(user_message, images=[processed_image])
             
         except Exception as e:
             error_msg = str(e)
@@ -275,7 +299,7 @@ def process_vocab_image(image_path: str, tracker: ImageProcessingTracker):
                 traceback.print_exc()
                 
                 # Use testing utility for debug info
-                print_agent_debug_info(agent, image_path, image)
+                print_agent_debug_info(agent, image_path, processed_image)
                 tracker.mark_processed(image_path, success=False, error_msg=error_msg)
                 return None
 

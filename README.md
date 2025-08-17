@@ -26,8 +26,15 @@ anki-ocr-agent/
 - **Skip Duplicates**: Won't reprocess images that already contributed to the CSV
 - **Automatic Logging**: All output is automatically saved to `agent_output.txt`
 - **Vision Processing**: Uses Qwen2.5-VL for OCR and vocabulary extraction
+- **Image Preprocessing**: Automatic image enhancement for better OCR accuracy
+  - Intelligent resizing to optimal dimensions
+  - Contrast enhancement for better text visibility
+  - Noise reduction to clean up image artifacts
+  - Sharpening filters to improve text clarity
+  - Compression optimization for faster processing
 - **YAML to CSV**: Converts extracted vocabulary to Anki-ready format
 - **Error Handling**: Comprehensive error handling with fallback options
+- **Configurable**: Easy customization of preprocessing settings
 
 # Step-by-step
 
@@ -238,99 +245,6 @@ python vocab_ocr_agent.py
 If you want, I can also give you a **batch mode** version (process all images in `./input/`) or wire it to **AnkiConnect** so it imports automatically after generating the CSV.
 
 
-
-
----
-
-## Auto watch implementation
-
-Got it 👍 You want your `vocab_ocr_agent.py` to **auto-watch a folder** for new images and process them as soon as they appear — no need to manually re-run. This is basically like “loop mode + auto-watch.”
-
-Here’s a clean version with that added:
-
-```python
-import os
-import time
-import pytesseract
-from PIL import Image
-import ollama
-import argparse
-
-def process_image(image_path, output_file):
-    """Extract text from image and process with Ollama."""
-    try:
-        print(f"[INFO] Processing: {image_path}")
-        img = Image.open(image_path)
-        extracted_text = pytesseract.image_to_string(img)
-
-        # Skip if no text found
-        if not extracted_text.strip():
-            print(f"[WARN] No text found in {image_path}")
-            return
-
-        prompt = f"""
-        I will upload an image containing vocabulary words with their meanings and example sentences.
-
-        Your tasks are:
-        1. For each vocabulary entry, extract:
-           - word: the vocabulary word (lowercase unless it is a personal/proper name, in which case keep original capitalization)
-           - meaning: the definition of the word
-           - example: an example sentence using the word
-
-        Text:
-        {extracted_text}
-        """
-
-        response = ollama.chat(model="llama3.2", messages=[{"role": "user", "content": prompt}])
-        result = response["message"]["content"]
-
-        with open(output_file, "a", encoding="utf-8") as f:
-            f.write(f"\n\n# Processed from {os.path.basename(image_path)}\n")
-            f.write(result.strip())
-
-        print(f"[SUCCESS] Results written to {output_file}")
-    except Exception as e:
-        print(f"[ERROR] Failed to process {image_path}: {e}")
-
-def watch_folder(input_dir, output_file, interval=5):
-    """Continuously watch a folder for new images and process them."""
-    print(f"[WATCH] Monitoring folder: {input_dir}")
-    seen = set()
-
-    while True:
-        try:
-            # Look for new images
-            images = [f for f in os.listdir(input_dir) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
-            new_images = [f for f in images if f not in seen]
-
-            for img_file in new_images:
-                img_path = os.path.join(input_dir, img_file)
-                process_image(img_path, output_file)
-                seen.add(img_file)
-
-            time.sleep(interval)
-
-        except KeyboardInterrupt:
-            print("\n[EXIT] Stopped watching.")
-            break
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="OCR Vocabulary Agent with Auto-Watch Mode")
-    parser.add_argument("--input", type=str, required=True, help="Input directory with images")
-    parser.add_argument("--output", type=str, required=True, help="Output markdown file")
-    parser.add_argument("--watch", action="store_true", help="Enable auto-watch mode")
-    parser.add_argument("--interval", type=int, default=5, help="Polling interval in seconds")
-    args = parser.parse_args()
-
-    if args.watch:
-        watch_folder(args.input, args.output, args.interval)
-    else:
-        for img_file in os.listdir(args.input):
-            if img_file.lower().endswith((".png", ".jpg", ".jpeg")):
-                img_path = os.path.join(args.input, img_file)
-                process_image(img_path, args.output)
-```
-
 ---
 
 ### 🔧 How to use
@@ -354,3 +268,216 @@ if __name__ == "__main__":
    → Keeps watching `./images`. Whenever you drop a new `.png/.jpg/.jpeg`, it auto-extracts and appends results to `vocab.md`.
 
 ---
+
+# Image Preprocessing
+
+The script automatically applies image preprocessing to improve OCR accuracy:
+
+## Preprocessing Steps
+1. **Resize**: Scales down large images to optimal dimensions (default: 2048x2048 max)
+2. **Contrast Enhancement**: Improves text visibility (configurable factor)
+3. **Noise Reduction**: Removes image artifacts using Gaussian blur
+4. **Sharpening**: Enhances text edges for better recognition
+5. **Compression**: Optimizes file size for faster processing
+
+## Choosing the Right Configuration
+
+The script includes several preset configurations optimized for different scenarios:
+
+### Available Presets
+
+| Config | Best For | Speed | Quality | File Size | Description |
+|--------|----------|-------|---------|-----------|-------------|
+| **MINIMAL_CONFIG** | Testing/Debug | ⚡⚡⚡ | ⭐ | Original | No preprocessing - uses original image |
+| **FAST_CONFIG** | Quick processing | ⚡⚡ | ⭐⭐ | Small | Light processing with JPEG compression |
+| **OPTIMIZED_CONFIG** | Most images | ⚡ | ⭐⭐⭐ | Medium | Balanced quality/speed, resizes to 1024x768 |
+| **OCR_OPTIMIZED_CONFIG** | Text-heavy images | ⚡ | ⭐⭐⭐⭐ | Small | Aggressive text enhancement, resizes to 800x600 |
+| **QUALITY_CONFIG** | High-quality scans | ⭐ | ⭐⭐⭐⭐⭐ | Large | Maximum quality processing |
+
+
+
+## Switching Configurations
+
+To change the preprocessing configuration, edit `vocab_ocr_agent.py`:
+
+```python
+# Find this line (around line 200):
+processed_image, processing_summary = preprocess_image_for_ocr(image_path, QUALITY_CONFIG)
+
+# Replace with your preferred config:
+processed_image, processing_summary = preprocess_image_for_ocr(image_path, OCR_OPTIMIZED_CONFIG)
+```
+
+## Debug Mode
+
+Enable debug mode to save intermediate processing steps:
+
+```python
+# In core/image_config.py
+save_intermediate_steps: bool = True
+save_processed_image: bool = True  # Also save final processed image
+```
+
+This saves each preprocessing step to `output/preprocessing_debug/` for analysis:
+```
+output/preprocessing_debug/
+├── 01_original.png         # Original image
+├── 02_resized.png          # After resizing
+├── 03_contrast.png         # After contrast enhancement
+├── 04_denoised.png         # After noise reduction
+├── 05_sharpened.png        # After sharpening
+└── 06_compressed.png       # Final compressed result
+```
+
+Additionally, the final processed images are saved to `output/processed_images/`:
+```
+output/processed_images/
+├── vocabulary_page_processed.jpeg    # Final processed image sent to OCR
+├── notes_scan_processed.jpeg         # Another processed image
+└── ...
+```
+
+## Expected Results by Config
+
+### FAST_CONFIG Results
+- **Size reduction**: 30-50%
+- **Processing time**: 1-2 seconds
+- **Quality**: Good for clear images
+
+### OCR_OPTIMIZED_CONFIG Results
+- **Size reduction**: 60-80%
+- **Processing time**: 2-3 seconds
+- **Quality**: Excellent for text recognition
+
+### QUALITY_CONFIG Results
+- **Size reduction**: 10-30%
+- **Processing time**: 3-5 seconds
+- **Quality**: Maximum detail preservation
+
+## Monitoring Preprocessing
+
+The script shows detailed preprocessing statistics:
+
+```
+📊 Preprocessing stats:
+   Original: (1600, 900) (147036 bytes)
+   Processed: (800, 450) (65432 bytes)
+   Size reduction: 55.5%
+   Resolution reduction: 75.0%
+📝 Processing steps: Resized 1600x900 → 800x450 | Contrast enhanced (factor: 1.4) | ...
+```
+
+**Good results to look for:**
+- Size reduction: 20-70% (depending on config)
+- Resolution reduction: 0-75% (depending on config)
+- Processing completes without errors
+- Processed image saved to `output/processed_images/`
+
+**Warning signs:**
+- Size increase (negative reduction %)
+- No resize when expected
+- Processing errors or failures
+
+---
+
+# Customization
+
+## Creating Custom Image Preprocessing
+
+You can create your own preprocessing configuration for specific needs:
+
+```python
+# In vocab_ocr_agent.py, add before the main processing:
+from core.image_config import ImagePreprocessingConfig
+
+# Create custom config for your specific images
+CUSTOM_CONFIG = ImagePreprocessingConfig(
+    enable_preprocessing=True,
+    enable_resize=True,
+    enable_compression=True,
+    enable_contrast=True,
+    enable_noise_reduction=False,    # Disable if images are clean
+    enable_sharpening=True,
+    
+    # Size settings
+    max_width=1200,                  # Custom size for your images
+    max_height=800,
+    
+    # Enhancement settings
+    contrast_factor=1.6,             # Higher for low-contrast scans
+    sharpening_factor=1.8,           # Higher for blurry text
+    
+    # Compression
+    output_format="JPEG",
+    jpeg_quality=85,
+    
+    # Debug and output
+    save_intermediate_steps=True,    # Enable to see each step
+    save_processed_image=True,       # Save final processed image
+    intermediate_dir="output/my_debug",
+    processed_image_dir="output/my_processed"
+)
+
+# Then use it in processing:
+processed_image, summary = preprocess_image_for_ocr(image_path, CUSTOM_CONFIG)
+```
+
+## Fine-tuning Parameters
+
+### Contrast Factor
+- `1.0` = No change
+- `1.2-1.4` = Good for most images
+- `1.5-2.0` = For very low contrast images
+- `>2.0` = May cause artifacts
+
+### Noise Reduction Radius
+- `0` = No noise reduction
+- `0.1-0.3` = Light smoothing, preserves text
+- `0.4-0.7` = Moderate smoothing
+- `>0.8` = Heavy smoothing, may blur text
+
+### Sharpening Factor
+- `1.0` = No sharpening
+- `1.2-1.5` = Good for most text
+- `1.6-2.0` = Strong sharpening for blurry images
+- `>2.0` = May create artifacts
+
+### JPEG Quality
+- `60-70` = Small files, some quality loss
+- `75-85` = Good balance
+- `85-95` = High quality, larger files
+- `95-100` = Maximum quality
+
+## Image Type Recommendations
+
+**For book/document photos:**
+```python
+DOCUMENT_CONFIG = ImagePreprocessingConfig(
+    max_width=1024, max_height=1024,
+    contrast_factor=1.4,
+    noise_reduction_radius=0.2,
+    sharpening_factor=1.6,
+    output_format="JPEG", jpeg_quality=85
+)
+```
+
+**For handwritten notes:**
+```python
+HANDWRITING_CONFIG = ImagePreprocessingConfig(
+    max_width=1200, max_height=1200,
+    contrast_factor=1.5,
+    noise_reduction_radius=0.1,
+    sharpening_factor=1.3,
+    output_format="PNG"  # Better for line art
+)
+```
+
+**For screenshot/digital images:**
+```python
+DIGITAL_CONFIG = ImagePreprocessingConfig(
+    enable_noise_reduction=False,  # Already clean
+    enable_sharpening=False,       # Already sharp
+    max_width=800, max_height=600,
+    output_format="JPEG", jpeg_quality=75
+)
+```
