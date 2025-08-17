@@ -14,6 +14,49 @@ def safe_tool_name(t):
     except Exception:
         return repr(t)
 
+def print_agent_debug_info(agent, image_path, image=None):
+    """Print debugging information for agent and image processing."""
+    print("\n🔍 Debugging information:")
+    print(f"   📁 Working directory: {os.getcwd()}")
+    print(f"   📄 Image exists: {os.path.exists(image_path)}")
+    print(f"   📏 Image size: {os.path.getsize(image_path)} bytes")
+    print(f"   🔗 Model: {type(agent.model).__name__}")
+    if image:
+        print(f"   🖼️  PIL Image: {image.size} {image.mode}")
+    print(f"   ⚙️  Model config: flatten_messages_as_text={getattr(agent.model, 'flatten_messages_as_text', 'unknown')}")
+
+def analyze_csv_output(csv_path="anki_cards.csv"):
+    """Analyze and report on generated CSV output."""
+    if os.path.exists(csv_path):
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        lines = content.strip().split('\n')
+        print(f"📊 Generated CSV with {len(lines)} lines (including header)")
+        print(f"📄 Output file: {os.path.abspath(csv_path)}")
+        
+        if len(lines) > 1:
+            print("\n📋 Generated vocabulary preview:")
+            for i, line in enumerate(lines[:4]):
+                if i == 0:
+                    print(f"   Header: {line}")
+                else:
+                    try:
+                        word = line.split(',')[0]
+                        print(f"   Word {i}: {word}")
+                    except:
+                        print(f"   Line {i}: {line[:50]}...")
+        
+        # Detect fake content
+        content_lower = content.lower()
+        fake_indicators = ['word1','word2','definition1','example1']
+        detected_fake = [f for f in fake_indicators if f in content_lower]
+        if detected_fake:
+            print(f"\n❌ FAKE CONTENT DETECTED: {detected_fake}")
+        elif len(lines) <= 2:
+            print(f"\n⚠️ Very little content generated ({len(lines)-1} words)")
+    else:
+        print("⚠️ No anki_cards.csv file was created - agent failed completely")
+
 def run_comprehensive_self_test():
     """
     Comprehensive self-test suite to verify all components are working.

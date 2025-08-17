@@ -15,9 +15,13 @@ import sys
 import traceback
 from PIL import Image
 
-from config.prompts import OCR_PROMPT
 from core.agent_factory import create_vocab_agent
-from utils.testing import run_comprehensive_self_test, safe_tool_name
+from utils.testing import (
+    run_comprehensive_self_test,
+    safe_tool_name,
+    print_agent_debug_info,
+    analyze_csv_output,
+)
 from tools import yaml_to_anki, file_reader, file_writer
 
 
@@ -64,7 +68,7 @@ def process_vocab_image(image_path: str):
     # Construct message for vision processing
     user_message = (
         f"Analyze this vocabulary image and extract real vocabulary words, definitions, and examples.\n\n"
-        f"CRITICAL: Extract ONLY what you actually see in the image. "
+        f"CRITICAL: Extract ONLY what you actually see in the image and do it only once. If the word is repeated, skip it."
         f"DO NOT generate placeholder content like 'word1', 'word2', 'definition1'.\n\n"
         f"Format as YAML:\n"
         f"- word: [actual word]\n"
@@ -106,61 +110,20 @@ def process_vocab_image(image_path: str):
             print(f"❌ Fallback also failed: {fallback_error}")
             traceback.print_exc()
             
-            # Try to provide helpful debugging information
-            print("\n🔍 Debugging information:")
-            print(f"   📁 Working directory: {os.getcwd()}")
-            print(f"   📄 Image exists: {os.path.exists(image_path)}")
-            print(f"   📏 Image size: {os.path.getsize(image_path)} bytes")
-            print(f"   🔗 Model: {type(agent.model).__name__}")
-            print(f"   🖼️  PIL Image: {image.size} {image.mode}")
-            print(f"   ⚙️  Model config: flatten_messages_as_text={getattr(agent.model, 'flatten_messages_as_text', 'unknown')}")
-            
+            # Use testing utility for debug info
+            print_agent_debug_info(agent, image_path, image)
             raise
 
     print("\n✅ Agent execution completed!")
     print("Agent run returned:", result)
 
-    # Post-process generated CSV
-    csv_path = "anki_cards.csv"
-    if os.path.exists(csv_path):
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        lines = content.strip().split('\n')
-        print(f"📊 Generated CSV with {len(lines)} lines (including header)")
-        print(f"📄 Output file: {os.path.abspath(csv_path)}")
-        
-        if len(lines) > 1:
-            print("\n📋 Generated vocabulary preview:")
-            for i, line in enumerate(lines[:4]):
-                if i == 0:
-                    print(f"   Header: {line}")
-                else:
-                    try:
-                        word = line.split(',')[0]
-                        print(f"   Word {i}: {word}")
-                    except:
-                        print(f"   Line {i}: {line[:50]}...")
-        
-        # Detect fake content
-        content_lower = content.lower()
-        fake_indicators = ['word1','word2','definition1','example1']
-        detected_fake = [f for f in fake_indicators if f in content_lower]
-        if detected_fake:
-            print(f"\n❌ FAKE CONTENT DETECTED: {detected_fake}")
-        elif len(lines) <= 2:
-            print(f"\n⚠️ Very little content generated ({len(lines)-1} words)")
-
-    else:
-        print("⚠️ No anki_cards.csv file was created - agent failed completely")
+    # Use testing utility to analyze output
+    analyze_csv_output()
 
     return result
 
 
 if __name__ == "__main__":
-    run_comprehensive_self_test()
-    vocab_image = sys.argv[1] if len(sys.argv) > 1 else "input/vocabulary_page.png"
-    print(f"\n🖼️  Processing image: {vocab_image}")
-    process_vocab_image(vocab_image)
     run_comprehensive_self_test()
     vocab_image = sys.argv[1] if len(sys.argv) > 1 else "input/vocabulary_page.png"
     print(f"\n🖼️  Processing image: {vocab_image}")

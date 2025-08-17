@@ -10,7 +10,7 @@
    📏 File size: 116 bytes
 → Reading test file via FileReader...
    📖 Read 110 characters
-   📝 Content preview: 'agent self-test: comprehensive check\nLine 2: UTF-8 encoding test: áéíóú ñ\nLine 3: timestamp=17553847'...
+   📝 Content preview: 'agent self-test: comprehensive check\nLine 2: UTF-8 encoding test: áéíóú ñ\nLine 3: timestamp=17554372'...
    ✅ File write/read integrity: PASSED
 
 📂 TEST 2: Directory and File Discovery
@@ -21,7 +21,7 @@
    📄 agent_output.txt (0 bytes)
    📄 agent_self_test.txt (116 bytes)
    📄 anki_cards.csv (89 bytes)
-   📄 vocab_ocr_agent.py (6455 bytes)
+   📄 vocab_ocr_agent.py (4535 bytes)
 → Input directory 'input' found
    📁 Contains 1 total files
    🖼️  Found 1 image files:
@@ -73,217 +73,225 @@ Agent created. Tools reported by agent (best-effort):
 
 🚀 Starting agent execution with vision...
 📊 Using smolagents native image support...
-╭───────────────────────────────────────────────────────────────────────────────── New run ──────────────────────────────────────────────────────────────────────────────────╮
-│                                                                                                                                                                            │
-│ Analyze this vocabulary image and extract real vocabulary words, definitions, and examples.                                                                                │
-│                                                                                                                                                                            │
-│ CRITICAL: Extract ONLY what you actually see in the image. DO NOT generate placeholder content like 'word1', 'word2', 'definition1'.                                       │
-│                                                                                                                                                                            │
-│ Format as YAML:                                                                                                                                                            │
-│ - word: [actual word\]                                                                                                                                                     │
-│   back: '[real definition\] ("[real example 1\]", "[real example 2\]")'                                                                                                    │
-│   tags: [part of speech\]                                                                                                                                                  │
-│                                                                                                                                                                            │
-│ Then call yaml_to_anki(yaml_content) with your extracted YAML.                                                                                                             │
-│                                                                                                                                                                            │
-╰─ LiteLLMModel - ollama/qwen2.5vl:latest ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- ─ Executing parsed code: ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-  import re                                                                                                                                                                  
-                                                                                                                                                                             
-  yaml_content = """                                                                                                                                                         
-  - word: Whether                                                                                                                                                            
-    back: 'yes - to be - ought'                                                                                                                                              
-    tags: [adverb]                                                                                                                                                           
-                                                                                                                                                                             
-  - word: earnest                                                                                                                                                            
-    back: 'honest - sincere'                                                                                                                                                 
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: wit                                                                                                                                                                
-    back: 'humor - clever'                                                                                                                                                   
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: Spitting                                                                                                                                                           
-    back: 'exhale - expel'                                                                                                                                                   
-    tags: [verb]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: engine                                                                                                                                                             
-    back: 'motor - engine'                                                                                                                                                   
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: general                                                                                                                                                            
-    back: 'common - widespread'                                                                                                                                              
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: acquired                                                                                                                                                           
-    back: 'learned - obtained'                                                                                                                                               
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: crumb                                                                                                                                                              
-    back: 'small - tiny'                                                                                                                                                     
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: lattice                                                                                                                                                            
-    back: 'net - grid'                                                                                                                                                       
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: Qt                                                                                                                                                                 
-    back: 'Sorcerer - wizard'                                                                                                                                                
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: strong                                                                                                                                                             
-    back: 'deep - forceful'                                                                                                                                                  
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: light-hearted                                                                                                                                                      
-    back: 'cheerful - playful'                                                                                                                                               
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: scions                                                                                                                                                             
-    back: 'sons - offspring'                                                                                                                                                 
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: control                                                                                                                                                            
-    back: 'command - govern'                                                                                                                                                 
-    tags: [verb]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: stack                                                                                                                                                              
-    back: 'pile - mount'                                                                                                                                                     
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: accent                                                                                                                                                             
-    back: 'taste - flavor'                                                                                                                                                   
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: quail                                                                                                                                                              
-    back: 'Coturnix - bird'                                                                                                                                                  
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: flows                                                                                                                                                              
-    back: 'hike - fiber'                                                                                                                                                     
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: steadily                                                                                                                                                           
-    back: 'slowly - consistently'                                                                                                                                            
-    tags: [adverb]                                                                                                                                                           
-                                                                                                                                                                             
-  - word: Fenian                                                                                                                                                             
-    back: 'Demagogue - leader'                                                                                                                                               
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: loomed                                                                                                                                                             
-    back: 'tower - loom'                                                                                                                                                     
-    tags: [verb]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: thickly                                                                                                                                                            
-    back: 'dense - thick'                                                                                                                                                    
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: fencing                                                                                                                                                            
-    back: 'sword - swordplay'                                                                                                                                                
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: drogged                                                                                                                                                            
-    back: 'clad - clad'                                                                                                                                                      
-    tags: [verb]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: cockslate                                                                                                                                                          
-    back: 'moral - moral'                                                                                                                                                    
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: slinky                                                                                                                                                             
-    back: 'agile - flexible'                                                                                                                                                 
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: nimblly                                                                                                                                                            
-    back: 'agile - flexible'                                                                                                                                                 
-    tags: [adverb]                                                                                                                                                           
-                                                                                                                                                                             
-  - word: shawl                                                                                                                                                              
-    back: 'chief - mantle'                                                                                                                                                   
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: cylinder                                                                                                                                                           
-    back: 'long - tube'                                                                                                                                                      
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: full                                                                                                                                                               
-    back: 'large - entire'                                                                                                                                                   
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: bearded                                                                                                                                                            
-    back: 'hair - beard'                                                                                                                                                     
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: subdued                                                                                                                                                            
-    back: 'forced - subdued'                                                                                                                                                 
-    tags: [verb]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: dill-witted                                                                                                                                                        
-    back: 'foolish - dill-witted'                                                                                                                                            
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: gull-like                                                                                                                                                          
-    back: 'causal - gull-like'                                                                                                                                               
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: sharp                                                                                                                                                              
-    back: 'pointed - sharp'                                                                                                                                                  
-    tags: [adjective]                                                                                                                                                        
-                                                                                                                                                                             
-  - word: clyde                                                                                                                                                              
-    back: 'ceiling - clyde'                                                                                                                                                  
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: w:be                                                                                                                                                               
-    back: 'example - be'                                                                                                                                                     
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: beards                                                                                                                                                             
-    back: 'hair - beard'                                                                                                                                                     
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: scatters                                                                                                                                                           
-    back: 'expanding - scatters'                                                                                                                                             
-    tags: [verb]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: narrowed                                                                                                                                                           
-    back: 'narrowed - narrowed'                                                                                                                                              
-    tags: [verb]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: unevenness                                                                                                                                                         
-    back: 'irregular - unevenness'                                                                                                                                           
-    tags: [noun]                                                                                                                                                             
-                                                                                                                                                                             
-  - word: Stanley                                                                                                                                                            
-    back: 'Fluoride - fluoride'                                                                                                                                              
-    tags: [noun]                                                                                                                                                             
-  """                                                                                                                                                                        
-                                                                                                                                                                             
-  yaml_to_anki(yaml_content)                                                                                                                                                 
- ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+╭───────────────────────────────────── New run ──────────────────────────────────────╮
+│                                                                                    │
+│ Analyze this vocabulary image and extract real vocabulary words, definitions, and  │
+│ examples.                                                                          │
+│                                                                                    │
+│ CRITICAL: Extract ONLY what you actually see in the image and do it only once. If  │
+│ the word is repeated, skip it.DO NOT generate placeholder content like 'word1',    │
+│ 'word2', 'definition1'.                                                            │
+│                                                                                    │
+│ Format as YAML:                                                                    │
+│ - word: [actual word\]                                                             │
+│   back: '[real definition\] ("[real example 1\]", "[real example 2\]")'            │
+│   tags: [part of speech\]                                                          │
+│                                                                                    │
+│ Then call yaml_to_anki(yaml_content) with your extracted YAML.                     │
+│                                                                                    │
+╰─ LiteLLMModel - ollama/qwen2.5vl:latest ───────────────────────────────────────────╯
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
+  yaml_content = """                                                                  
+  - word: Whether                                                                     
+    back: 'yes - no - sincere ("yes", "no")'                                          
+    tags: [adverb]                                                                    
+                                                                                      
+  - word: wit                                                                         
+    back: 'humor - intelligence - cleverness ("humor", "intelligence")'               
+    tags: [noun]                                                                      
+                                                                                      
+  - word: Spitting                                                                    
+    back: 'exhale - breathe out - expel ("exhale", "breathe out")'                    
+    tags: [verb]                                                                      
+                                                                                      
+  - word: engine                                                                      
+    back: 'motor - generator - power ("motor", "generator")'                          
+    tags: [noun]                                                                      
+                                                                                      
+  - word: general                                                                     
+    back: 'common - widespread - universal ("common", "widespread")'                  
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: acquired                                                                    
+    back: 'learned - obtained - gained ("learned", "obtained")'                       
+    tags: [verb]                                                                      
+                                                                                      
+  - word: crumb                                                                       
+    back: 'small piece of food - fragment - scrap ("small piece of food",             
+  "fragment")'                                                                        
+    tags: [noun]                                                                      
+                                                                                      
+  - word: lattice                                                                     
+    back: 'grid - mesh - framework ("grid", "mesh")'                                  
+    tags: [noun]                                                                      
+                                                                                      
+  - word: Qt                                                                          
+    back: 'open-source software - framework - application ("open-source software",    
+  "framework")'                                                                       
+    tags: [noun]                                                                      
+                                                                                      
+  - word: strong                                                                      
+    back: 'powerful - forceful - robust ("powerful", "forceful")'                     
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: light-hearted                                                               
+    back: 'cheerful - playful - carefree ("cheerful", "playful")'                     
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: scions                                                                      
+    back: 'sons - offspring - descendants ("sons", "offspring")'                      
+    tags: [noun]                                                                      
+                                                                                      
+  - word: control                                                                     
+    back: 'command - regulate - govern ("command", "regulate")'                       
+    tags: [verb]                                                                      
+                                                                                      
+  - word: stack                                                                       
+    back: 'pile - heap - collection ("pile", "heap")'                                 
+    tags: [noun]                                                                      
+                                                                                      
+  - word: accent                                                                      
+    back: 'intonation - emphasis - stress ("intonation", "emphasis")'                 
+    tags: [noun]                                                                      
+                                                                                      
+  - word: quail                                                                       
+    back: 'bird - game bird - partridge ("bird", "game bird")'                        
+    tags: [noun]                                                                      
+                                                                                      
+  - word: flows                                                                       
+    back: 'stream - current - water ("stream", "current")'                            
+    tags: [verb]                                                                      
+                                                                                      
+  - word: steadily                                                                    
+    back: 'slowly - gradually - consistently ("slowly", "gradually")'                 
+    tags: [adverb]                                                                    
+                                                                                      
+  - word: fan                                                                         
+    back: 'air mover - blower - ventilator ("air mover", "blower")'                   
+    tags: [noun]                                                                      
+                                                                                      
+  - word: loosed                                                                      
+    back: 'released - freed - untied ("released", "freed")'                           
+    tags: [verb]                                                                      
+                                                                                      
+  - word: gathered                                                                    
+    back: 'collected - assembled - brought together ("collected", "assembled")'       
+    tags: [verb]                                                                      
+                                                                                      
+  - word: thickly                                                                     
+    back: 'dense - heavy - compact ("dense", "heavy")'                                
+    tags: [adverb]                                                                    
+                                                                                      
+  - word: fencing                                                                     
+    back: 'sport - martial art - combat ("sport", "martial art")'                     
+    tags: [noun]                                                                      
+                                                                                      
+  - word: drogged                                                                     
+    back: 'tied - fastened - secured ("tied", "fastened")'                            
+    tags: [verb]                                                                      
+                                                                                      
+  - word: cocktail                                                                    
+    back: 'mixed drink - alcoholic beverage - drink ("mixed drink", "alcoholic        
+  beverage")'                                                                         
+    tags: [noun]                                                                      
+                                                                                      
+  - word: slinky                                                                      
+    back: 'flexible - pliable - bendy ("flexible", "pliable")'                        
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: spang                                                                       
+    back: 'sail - cloth - fabric ("sail", "cloth")'                                   
+    tags: [noun]                                                                      
+                                                                                      
+  - word: nimblly                                                                     
+    back: 'flexible - agile - quick ("flexible", "agile")'                            
+    tags: [adverb]                                                                    
+                                                                                      
+  - word: woody                                                                       
+    back: 'wood - timber - bark ("wood", "timber")'                                   
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: shawl                                                                       
+    back: 'garment - wrap - cover ("garment", "wrap")'                                
+    tags: [noun]                                                                      
+                                                                                      
+  - word: cylinder                                                                    
+    back: 'cylindrical shape - tube - pipe ("cylindrical shape", "tube")'             
+    tags: [noun]                                                                      
+                                                                                      
+  - word: full                                                                        
+    back: 'complete - entire - whole ("complete", "entire")'                          
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: beppeched                                                                   
+    back: 'bent - curved - twisted ("bent", "curved")'                                
+    tags: [verb]                                                                      
+                                                                                      
+  - word: subdued                                                                     
+    back: 'calmed - pacified - quieted ("calmed", "pacified")'                        
+    tags: [verb]                                                                      
+                                                                                      
+  - word: dill-witted                                                                 
+    back: 'foolish - silly - stupid ("foolish", "silly")'                             
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: gull-like                                                                   
+    back: 'seagull - bird - aquatic ("seagull", "bird")'                              
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: sharp                                                                       
+    back: 'pointed - acute - keen ("pointed", "acute")'                               
+    tags: [adjective]                                                                 
+                                                                                      
+  - word: clay                                                                        
+    back: 'clay - soil - mud ("clay", "soil")'                                        
+    tags: [noun]                                                                      
+                                                                                      
+  - word: w:be                                                                        
+    back: 'bend - curve - flex ("bend", "curve")'                                     
+    tags: [verb]                                                                      
+                                                                                      
+  - word: bender                                                                      
+    back: 'bend - curve - flex ("bend", "curve")'                                     
+    tags: [noun]                                                                      
+                                                                                      
+  - word: scattering                                                                  
+    back: 'dispersion - distribution - spread ("dispersion", "distribution")'         
+    tags: [noun]                                                                      
+                                                                                      
+  - word: narrowed                                                                    
+    back: 'became narrower - constricted - reduced ("became narrower",                
+  "constricted")'                                                                     
+    tags: [verb]                                                                      
+                                                                                      
+  - word: unevenness                                                                  
+    back: 'irregularity - lack of smoothness - roughness ("irregularity", "lack of    
+  smoothness")'                                                                       
+    tags: [noun]                                                                      
+                                                                                      
+  - word: steady                                                                      
+    back: 'firm - stable - solid ("firm", "stable")'                                  
+    tags: [adjective]                                                                 
+  """                                                                                 
+                                                                                      
+  yaml_to_anki(yaml_content)                                                          
+ ──────────────────────────────────────────────────────────────────────────────────── 
 Out: /home/gespitia/projects/anki-ocr-agent/anki_cards.csv
-[Step 1: Duration 183.38 seconds| Input tokens: 3,473 | Output tokens: 956]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 2 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- ─ Executing parsed code: ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-  yaml_to_anki(yaml_content)                                                                                                                                                 
- ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
-Out: /home/gespitia/projects/anki-ocr-agent/anki_cards.csv
-[Step 2: Duration 215.72 seconds| Input tokens: 10,284 | Output tokens: 1,013]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 3 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Step 1: Duration 235.75 seconds| Input tokens: 3,486 | Output tokens: 1,460]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 2 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Error in code parsing:
-Your code snippet is invalid, because the regex pattern <code>(.*?)</code> was not found in it.
-            Here is your code snippet:
-            Thought: The YAML content has been successfully converted into an Anki-ready CSV file. The task is complete.
-
-Final Answer:
-The task is complete. The vocabulary has been extracted and formatted into an Anki-ready CSV file.</code>
-            Make sure to include code with the correct pattern, for instance:
-            Thoughts: Your thoughts
-            <code>
-            # Your python code here
-            </code>
+Your code snippet is invalid, because the regex pattern <code>(.*?)</code> was not 
+found in it.
+Here is your code snippet:
+The YAML content has been successfully converted into an Anki-ready CSV file. The 
+vocabulary words, definitions, and examples have been extracted and formatted 
+correctly. The task is now complete.</code>
+Make sure to include code with the correct pattern, for instance:
+Thoughts: Your thoughts
+<code>
+# Your python code here
+</code>
 Make sure to provide correct code blobs.
-[Step 3: Duration 190.92 seconds| Input tokens: 18,463 | Output tokens: 1,059]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 4 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Step 2: Duration 177.73 seconds| Input tokens: 11,292 | Output tokens: 1,497]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 3 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
