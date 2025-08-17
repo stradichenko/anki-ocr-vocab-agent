@@ -33,15 +33,12 @@ def create_vocab_agent(
         max_steps=max_steps,
         verbosity_level=verbosity_level,
         add_base_tools=False,
-        additional_authorized_imports=['io', 'yaml', 'PIL']
+        additional_authorized_imports=['io', 'yaml', 'PIL', 'csv']
     )
     
     return agent
 
 # Notes for usage:
-# 1. Store YAML content in a variable first, then pass it to yaml_to_anki
-# 2. Do NOT wrap YAML content in backticks when calling tools
-# 3. Extract REAL content from images, not placeholder examples
-# 1. Store YAML content in a variable first, then pass it to yaml_to_anki
-# 2. Do NOT wrap YAML content in backticks when calling tools
+# 1. Call yaml_to_anki() directly with YAML string, avoid triple quotes
+# 2. Use simple variable assignments for YAML content
 # 3. Extract REAL content from images, not placeholder examples

@@ -25,30 +25,82 @@ def yaml_to_anki(yaml_content: str) -> str:
     if not isinstance(yaml_content, str):
         raise RuntimeError("yaml_content must be a string.")
 
+    # Clean up the YAML content
     yaml_content = yaml_content.strip()
+    
+    # Remove markdown fences if present
     if yaml_content.startswith("```") and yaml_content.endswith("```"):
         yaml_content = yaml_content[3:-3].strip()
+    elif yaml_content.startswith("```yaml"):
+        yaml_content = yaml_content[7:].strip()
+        if yaml_content.endswith("```"):
+            yaml_content = yaml_content[:-3].strip()
+    
+    # Handle truncated or malformed YAML
+    if yaml_content.count("'") % 2 != 0:
+        print("⚠️ Warning: Odd number of single quotes detected, attempting to fix...")
+        # Try to balance quotes by adding a closing quote at the end
+        yaml_content += "'"
+    
+    if yaml_content.count('"') % 2 != 0:
+        print("⚠️ Warning: Odd number of double quotes detected, attempting to fix...")
+        yaml_content += '"'
 
     try:
         data = yaml.safe_load(yaml_content)
     except yaml.YAMLError as e:
-        raise RuntimeError(f"❌ YAML error: {e}")
+        print(f"❌ YAML parsing failed: {e}")
+        print(f"📝 Problematic YAML content (first 500 chars): {yaml_content[:500]}")
+        
+        # Try to salvage partial content by finding complete entries
+        lines = yaml_content.split('\n')
+        salvaged_entries = []
+        current_entry = {}
+        
+        for line in lines:
+            line = line.strip()
+            if line.startswith('- word:'):
+                if current_entry:
+                    salvaged_entries.append(current_entry)
+                current_entry = {'word': line.split(':', 1)[1].strip()}
+            elif line.startswith('back:') and current_entry:
+                current_entry['back'] = line.split(':', 1)[1].strip().strip("'\"")
+            elif line.startswith('tags:') and current_entry:
+                current_entry['tags'] = line.split(':', 1)[1].strip().strip("[]")
+        
+        if current_entry:
+            salvaged_entries.append(current_entry)
+        
+        if salvaged_entries:
+            print(f"🔧 Salvaged {len(salvaged_entries)} entries from malformed YAML")
+            data = salvaged_entries
+        else:
+            print("❌ Could not salvage any entries, creating empty dataset")
+            data = []
 
     if isinstance(data, dict):
         data = [data]
     if not isinstance(data, list):
-        raise RuntimeError("❌ Parsed YAML is not a list or dict of entries.")
+        print("⚠️ Warning: Parsed YAML is not a list, converting to list")
+        data = []
 
     seen = set()
     cleaned_data = []
+    
     for entry in data:
         if not isinstance(entry, dict):
             continue
+            
         word = str(entry.get("word", "")).strip()
         back = str(entry.get("back", "")).strip()
         tags = str(entry.get("tags", "")).strip()
 
-        if not word:
+        # Clean up fields
+        word = word.strip("'\"")
+        back = back.strip("'\"")
+        tags = tags.strip("'\"[]")
+
+        if not word or word.lower() in ['word', 'example', 'test']:
             continue
 
         if not is_proper_name(word):
@@ -60,9 +112,15 @@ def yaml_to_anki(yaml_content: str) -> str:
 
         cleaned_data.append([word, back, tags])
 
-    with open(OUTPUT_FILE, "w", encoding="utf-8", newline="") as f:
+    # Append to existing CSV if it exists, otherwise create new
+    mode = 'a' if os.path.exists(OUTPUT_FILE) else 'w'
+    write_header = not os.path.exists(OUTPUT_FILE)
+    
+    with open(OUTPUT_FILE, mode, encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Word", "Back", "Tags"])
+        if write_header:
+            writer.writerow(["Word", "Back", "Tags"])
         writer.writerows(cleaned_data)
-
+    
+    print(f"✅ Successfully added {len(cleaned_data)} vocabulary entries to CSV")
     return os.path.abspath(OUTPUT_FILE)

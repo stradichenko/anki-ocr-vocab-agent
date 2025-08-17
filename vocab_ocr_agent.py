@@ -78,7 +78,12 @@ class ImageProcessingTracker:
     def is_processed(self, image_path):
         """Check if image has been successfully processed."""
         abs_path = os.path.abspath(image_path)
-        return abs_path in self.processed_images
+        if abs_path not in self.processed_images:
+            return False
+        
+        # Only consider it processed if it was successful
+        entry = self.processed_images[abs_path]
+        return entry.get("success", False) is True
     
     def mark_processed(self, image_path, success=True, error_msg=None):
         """Mark image as processed with status."""
@@ -177,50 +182,54 @@ def process_vocab_image(image_path: str, tracker: ImageProcessingTracker):
             tracker.mark_processed(image_path, success=False, error_msg=error_msg)
             return None
 
-        # Construct message for vision processing - improved based on smolagents best practices
+        # Construct message for vision processing - improved to avoid syntax errors
         user_message = (
             f"You are a vocabulary extraction specialist. Your task is to analyze the provided vocabulary image "
             f"and extract REAL vocabulary words with their definitions and examples.\n\n"
-            f"There are three image scenarios: \n"
-            f"1) handwritten notes on vocabulary and some related information to the vocabulary terms; \n"
-            f"2) printed text with highlighted words in color blue [vocabulary].\n"
-            f"3) just a list of vocabulary words word1, word2, word3.\n\n"
+            f"You will encounter 3 different types of images:\n\n"
+            f"1. Vocabulary pages with multiple words and definitions\n"
+            f"2. Lists of vocabulary words\n"
+            f"3. Images of printed texts with vocabulary words highlighted in blue\n\n"
 
             f"CRITICAL REQUIREMENTS:\n"
             f"1. Extract ONLY what you actually see in the image - no placeholder content\n"
             f"2. DO NOT read the same definition more than once\n"
             f"3. If a word appears multiple times, include it only once\n"
             f"4. DO NOT generate fake content like 'word1', 'word2', 'definition1', 'example1'\n"
-            f"5. DO NOT attempt to import Python libraries\n"
+            f"5. DO NOT use Python libraries\n"
             f"6. Focus on complete, meaningful vocabulary entries only\n\n"
 
-            f"EXPECTED INPUT: A vocabulary page containing real words with definitions and example sentences in the same language of the vocabulary word\n\n"
-
-            f"OUTPUT FORMAT: You must format your extracted content as valid YAML with this exact structure:\n"
-            f"```yaml\n"
-            f"- word: [actual_word_from_image]\n"
-            f"  back: '[complete_definition_from_image] (\"[example_sentence_1]\", \"[example_sentence_2]\")'\n"
-            f"  tags: [part_of_speech]\n"
-            f"```\n\n"
-            
-            f"IMPORTANT NOTES:\n"
-            f"- Use single quotes around the 'back' field value to handle embedded quotes properly\n"
-            f"- Include 2-3 example sentences in double quotes within the definition if available\n"
-            f"- Valid tags include: noun, verb, adjective, adverb, preposition, conjunction, etc.\n"
-            f"- Ensure proper YAML indentation (2 spaces)\n\n"
-            
             f"WORKFLOW:\n"
             f"1. Carefully examine the image for vocabulary words and their definitions\n"
             f"2. Extract each word with its complete definition and examples\n"
-            f"3. Format the extracted content as YAML following the structure above\n"
-            f"4. Once text has been extracted call yaml_to_anki(yaml_content) with your properly formatted YAML string, so it formats the content for Anki\n\n"
+            f"3. Format the extracted content as proper YAML\n"
+            f"4. Call yaml_to_anki(yaml_string) with your YAML content\n\n"
 
-            f"ERROR HANDLING:\n"
-            f"- If you cannot read text clearly, skip that entry rather than guessing\n"
-            f"- If no vocabulary content is found, return an empty YAML list: []\n"
-            f"- If YAML formatting fails, double-check quote escaping and indentation\n\n"
+            f"YAML FORMAT: Use this exact structure:\n"
+            f"- word: actual_word\n"
+            f"  back: 'definition with examples (\"example1\", \"example2\")'\n"
+            f"  tags: part_of_speech\n\n"
             
-            f"Remember: Quality over quantity. Extract only what you can clearly read and understand from the image."
+            f"IMPORTANT INSTRUCTIONS:\n"
+            f"- DO NOT create variables like yaml_content = \"\"\"\n"
+            f"- DO NOT use triple quotes in your code\n"
+            f"- Call yaml_to_anki() directly with a simple YAML string\n"
+            f"- Use single quotes for YAML values containing quotes\n"
+            f"- Keep your YAML concise and well-formatted\n\n"
+            
+            f"EXAMPLE OF CORRECT APPROACH:\n"
+            f"yaml_string = '''- word: example\n"
+            f"  back: 'A sample instance (\"This is an example\", \"For example\")'\n"
+            f"  tags: noun'''\n"
+            f"yaml_to_anki(yaml_string)\n\n"
+            
+            f"ERROR HANDLING:\n"
+            f"- If you cannot read text clearly, skip that entry\n"
+            f"- If no vocabulary content is found, call yaml_to_anki('[]')\n"
+            f"- Keep YAML simple and avoid complex formatting\n\n"
+            
+            f"Remember: Extract real content from the image and call the tool directly. "
+            f"Avoid creating large code blocks or variables that might cause parsing errors."
         )
 
         print("\n🚀 Starting agent execution with vision...")
@@ -312,33 +321,47 @@ def process_all_images(input_directory="input"):
     # Check which images need processing
     new_images = []
     skipped_images = []
+    failed_images = []
     
     for image_path in image_files:
+        abs_path = os.path.abspath(image_path)
         if tracker.is_processed(image_path):
             skipped_images.append(image_path)
+        elif abs_path in tracker.processed_images:
+            # Image was processed before but failed - allow reprocessing
+            failed_images.append(image_path)
+            new_images.append(image_path)
         else:
             new_images.append(image_path)
     
     # Show processing summary
     print(f"\n📊 Processing Summary:")
     print(f"   🔍 Total images found: {len(image_files)}")
-    print(f"   ✅ Already processed: {len(skipped_images)}")
-    print(f"   🆕 New images to process: {len(new_images)}")
+    print(f"   ✅ Already processed (successful): {len(skipped_images)}")
+    print(f"   🔄 Failed previously (will retry): {len(failed_images)}")
+    print(f"   🆕 New images to process: {len(new_images) - len(failed_images)}")
+    print(f"   📋 Total to process this run: {len(new_images)}")
     
     if skipped_images:
-        print(f"\n⏭️  Skipping already processed images:")
+        print(f"\n⏭️  Skipping successfully processed images:")
         for img in skipped_images:
             status = tracker.processed_images[os.path.abspath(img)]
-            status_icon = "✅" if status.get("success", False) else "❌"
-            print(f"   {status_icon} {os.path.basename(img)} (processed: {status.get('processed_at', 'unknown')})")
+            print(f"   ✅ {os.path.basename(img)} (processed: {status.get('processed_at', 'unknown')})")
+    
+    if failed_images:
+        print(f"\n🔄 Retrying previously failed images:")
+        for img in failed_images:
+            status = tracker.processed_images[os.path.abspath(img)]
+            error_msg = status.get('error', 'Unknown error')
+            print(f"   🔄 {os.path.basename(img)} (last error: {error_msg[:50]}...)")
     
     if not new_images:
-        print("\n🎉 All images have already been processed!")
+        print("\n🎉 All images have already been successfully processed!")
         stats = tracker.get_processing_stats()
         print(f"📊 Final stats: {stats['successful']} successful, {stats['failed']} failed out of {stats['total']} total")
         return
     
-    print(f"\n🚀 Processing {len(new_images)} new images...")
+    print(f"\n🚀 Processing {len(new_images)} images...")
     
     # Process each new image
     successful = 0
@@ -410,4 +433,5 @@ if __name__ == "__main__":
         tee_stdout.close()
         tee_stderr.close()
         
+        print(f"✅ Execution complete. Full log saved to: {log_file}")
         print(f"✅ Execution complete. Full log saved to: {log_file}")
