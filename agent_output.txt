@@ -21,7 +21,7 @@
    📄 agent_output.txt (0 bytes)
    📄 agent_self_test.txt (116 bytes)
    📄 anki_cards.csv (89 bytes)
-   📄 vocab_ocr_agent.py (4535 bytes)
+   📄 vocab_ocr_agent.py (6411 bytes)
 → Input directory 'input' found
    📁 Contains 1 total files
    🖼️  Found 1 image files:
@@ -75,223 +75,614 @@ Agent created. Tools reported by agent (best-effort):
 📊 Using smolagents native image support...
 ╭───────────────────────────────────── New run ──────────────────────────────────────╮
 │                                                                                    │
-│ Analyze this vocabulary image and extract real vocabulary words, definitions, and  │
+│ You are a vocabulary extraction specialist. Your task is to analyze the provided   │
+│ vocabulary image and extract REAL vocabulary words with their definitions and      │
 │ examples.                                                                          │
 │                                                                                    │
-│ CRITICAL: Extract ONLY what you actually see in the image and do it only once. If  │
-│ the word is repeated, skip it.DO NOT generate placeholder content like 'word1',    │
-│ 'word2', 'definition1'.                                                            │
+│ CRITICAL REQUIREMENTS:                                                             │
+│ 1. Extract ONLY what you actually see in the image - no placeholder content        │
+│ 2. DO NOT read the same definition more than once                                  │
+│ 3. If a word appears multiple times, include it only once                          │
+│ 4. DO NOT generate fake content like 'word1', 'word2', 'definition1', 'example1'   │
+│ 5. DO NOT attempt to import Python libraries                                       │
+│ 6. Focus on complete, meaningful vocabulary entries only                           │
 │                                                                                    │
-│ Format as YAML:                                                                    │
-│ - word: [actual word\]                                                             │
-│   back: '[real definition\] ("[real example 1\]", "[real example 2\]")'            │
-│   tags: [part of speech\]                                                          │
+│ EXPECTED INPUT: A vocabulary page containing real words with definitions and       │
+│ example sentences in the same language of the vocabulary word                      │
 │                                                                                    │
-│ Then call yaml_to_anki(yaml_content) with your extracted YAML.                     │
+│ OUTPUT FORMAT: You must format your extracted content as valid YAML with this      │
+│ exact structure:                                                                   │
+│ ```yaml                                                                            │
+│ - word: [actual_word_from_image\]                                                  │
+│   back: '[complete_definition_from_image\] ("[example_sentence_1\]",               │
+│ "[example_sentence_2\]")'                                                          │
+│   tags: [part_of_speech\]                                                          │
+│ ```                                                                                │
+│                                                                                    │
+│ IMPORTANT NOTES:                                                                   │
+│ - Use single quotes around the 'back' field value to handle embedded quotes        │
+│ properly                                                                           │
+│ - Include 2-3 example sentences in double quotes within the definition if          │
+│ available                                                                          │
+│ - Valid tags include: noun, verb, adjective, adverb, preposition, conjunction,     │
+│ etc.                                                                               │
+│ - Ensure proper YAML indentation (2 spaces)                                        │
+│                                                                                    │
+│ WORKFLOW:                                                                          │
+│ 1. Carefully examine the image for vocabulary words and their definitions          │
+│ 2. Extract each word with its complete definition and examples                     │
+│ 3. Format the extracted content as YAML following the structure above              │
+│ 4. Once text has been extracted call yaml_to_anki(yaml_content) with your properly │
+│ formatted YAML string, so it formats the content for Anki                          │
+│                                                                                    │
+│ ERROR HANDLING:                                                                    │
+│ - If you cannot read text clearly, skip that entry rather than guessing            │
+│ - If no vocabulary content is found, return an empty YAML list: []                 │
+│ - If YAML formatting fails, double-check quote escaping and indentation            │
+│                                                                                    │
+│ Remember: Quality over quantity. Extract only what you can clearly read and        │
+│ understand from the image.                                                         │
 │                                                                                    │
 ╰─ LiteLLMModel - ollama/qwen2.5vl:latest ───────────────────────────────────────────╯
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
-  yaml_content = """                                                                  
-  - word: Whether                                                                     
-    back: 'yes - no - sincere ("yes", "no")'                                          
-    tags: [adverb]                                                                    
+  vocabulary_list = []                                                                
                                                                                       
-  - word: wit                                                                         
-    back: 'humor - intelligence - cleverness ("humor", "intelligence")'               
-    tags: [noun]                                                                      
+  # Extracting vocabulary entries from the image                                      
+  entries = [                                                                         
+      ("Whether", "Si - Tonto - Sincero", "Si = Humor impreso - Bon Journo - Griego   
+  - Chopper"),                                                                        
+      ("Wit", "Humor - Excepción - Desaparecer - Chopper", "Humor = Sujeto - Mirada   
+  - Vislazgo"),                                                                       
+      ("Acquired", "Adquirido - Iniciado - Iniciante", "Adquirido = Destacado -       
+  Arriado"),                                                                          
+      ("Lattice", "Cáscara - Oxidado - Estimulante", "Cáscara = Alfar (Coke =         
+  Higo)"),                                                                            
+      ("Stack", "Pila - Mantas - Camarón", "Pila = Corteza aéreo"),                   
+      ("Quill", "Cilindro - Corteza - Fibra", "Cilindro = Hilezas - Fibra"),          
+      ("Fenix", "Demasiado - Alarma - Incompleto", "Demasiado = Tilar - Alarma -      
+  Incompleto"),                                                                       
+      ("Loosed", "Relajado - Acumulado - Redondo", "Relajado = Acumulado -            
+  Redondo"),                                                                          
+      ("Thickly", "Ocioso - Grueso - Distantemente", "Ocioso = Ceja"),                
+      ("Fencing", "Sobrino de - Basio", "Sobrino = Acotar - Trocer"),                 
+      ("Drogsack", "Colgado - Moral - Mochila", "Colgado = Moral - Mochila"),         
+      ("Sloppy", "Terco - Lastilla", "Terco = Agente - Habilisite"),                  
+      ("Spang", "Sellier (Cuerda & Spang)", "Sellier = Cuerda - Habilisite"),         
+      ("Nimbly", "Agilmente - Habilisite", "Agilmente = Cuerda - Habilisite"),        
+      ("Woolly", "Cuello de lana", "Cuello = Cuello de lana"),                        
+      ("Shawl", "Cuello", "Cuello = Cuello"),                                         
+      ("Sinder", "Delgado - Plano", "Delgado = Inciso"),                              
+      ("Full", "Largo - de cuerpo entero - Largo - Hilo - Logato", "Largo =           
+  Inciso"),                                                                           
+      ("Beepbecheld", "que lleva Sefiro - que usa, Visto", "Lleva = Sefiro -          
+  Visto"),                                                                            
+      ("Subdued", "Frenecido por un lento", "Frenecido = Lento"),                     
+      ("Gull-like", "Cuello - Novo", "Cuello = Novo"),                                
+      ("Sharp", "Cuerdo", "Cuerdo = Cuerdo"),                                         
+      ("Clay", "Línea", "Línea = Línea"),                                             
+      ("Wish", "Anillo", "Anillo = Anillo"),                                          
+      ("Bordered", "Especializado - Dividido", "Especializado = Dividido"),           
+      ("Scattering", "Cocinando", "Cocinando = Cocinando"),                           
+      ("Narrowed", "Anormal - Reducido", "Anormal = Reducido"),                       
+      ("Unevenness", "Irregular - Cerrada - Inverso", "Irregular = Inverso"),         
+      ("Steadily", "Flujo", "Flujo = Flujo - Rápido")                                 
+  ]                                                                                   
                                                                                       
-  - word: Spitting                                                                    
-    back: 'exhale - breathe out - expel ("exhale", "breathe out")'                    
-    tags: [verb]                                                                      
+  # Formatting the extracted content as YAML                                          
+  yaml_content = []                                                                   
+  for entry in entries:                                                               
+      word, back, tags = entry                                                        
+      yaml_content.append({                                                           
+          "word": word,                                                               
+          "back": f"'{back}'",                                                        
+          "tags": tags                                                                
+      })                                                                              
                                                                                       
-  - word: engine                                                                      
-    back: 'motor - generator - power ("motor", "generator")'                          
-    tags: [noun]                                                                      
-                                                                                      
-  - word: general                                                                     
-    back: 'common - widespread - universal ("common", "widespread")'                  
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: acquired                                                                    
-    back: 'learned - obtained - gained ("learned", "obtained")'                       
-    tags: [verb]                                                                      
-                                                                                      
-  - word: crumb                                                                       
-    back: 'small piece of food - fragment - scrap ("small piece of food",             
-  "fragment")'                                                                        
-    tags: [noun]                                                                      
-                                                                                      
-  - word: lattice                                                                     
-    back: 'grid - mesh - framework ("grid", "mesh")'                                  
-    tags: [noun]                                                                      
-                                                                                      
-  - word: Qt                                                                          
-    back: 'open-source software - framework - application ("open-source software",    
-  "framework")'                                                                       
-    tags: [noun]                                                                      
-                                                                                      
-  - word: strong                                                                      
-    back: 'powerful - forceful - robust ("powerful", "forceful")'                     
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: light-hearted                                                               
-    back: 'cheerful - playful - carefree ("cheerful", "playful")'                     
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: scions                                                                      
-    back: 'sons - offspring - descendants ("sons", "offspring")'                      
-    tags: [noun]                                                                      
-                                                                                      
-  - word: control                                                                     
-    back: 'command - regulate - govern ("command", "regulate")'                       
-    tags: [verb]                                                                      
-                                                                                      
-  - word: stack                                                                       
-    back: 'pile - heap - collection ("pile", "heap")'                                 
-    tags: [noun]                                                                      
-                                                                                      
-  - word: accent                                                                      
-    back: 'intonation - emphasis - stress ("intonation", "emphasis")'                 
-    tags: [noun]                                                                      
-                                                                                      
-  - word: quail                                                                       
-    back: 'bird - game bird - partridge ("bird", "game bird")'                        
-    tags: [noun]                                                                      
-                                                                                      
-  - word: flows                                                                       
-    back: 'stream - current - water ("stream", "current")'                            
-    tags: [verb]                                                                      
-                                                                                      
-  - word: steadily                                                                    
-    back: 'slowly - gradually - consistently ("slowly", "gradually")'                 
-    tags: [adverb]                                                                    
-                                                                                      
-  - word: fan                                                                         
-    back: 'air mover - blower - ventilator ("air mover", "blower")'                   
-    tags: [noun]                                                                      
-                                                                                      
-  - word: loosed                                                                      
-    back: 'released - freed - untied ("released", "freed")'                           
-    tags: [verb]                                                                      
-                                                                                      
-  - word: gathered                                                                    
-    back: 'collected - assembled - brought together ("collected", "assembled")'       
-    tags: [verb]                                                                      
-                                                                                      
-  - word: thickly                                                                     
-    back: 'dense - heavy - compact ("dense", "heavy")'                                
-    tags: [adverb]                                                                    
-                                                                                      
-  - word: fencing                                                                     
-    back: 'sport - martial art - combat ("sport", "martial art")'                     
-    tags: [noun]                                                                      
-                                                                                      
-  - word: drogged                                                                     
-    back: 'tied - fastened - secured ("tied", "fastened")'                            
-    tags: [verb]                                                                      
-                                                                                      
-  - word: cocktail                                                                    
-    back: 'mixed drink - alcoholic beverage - drink ("mixed drink", "alcoholic        
-  beverage")'                                                                         
-    tags: [noun]                                                                      
-                                                                                      
-  - word: slinky                                                                      
-    back: 'flexible - pliable - bendy ("flexible", "pliable")'                        
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: spang                                                                       
-    back: 'sail - cloth - fabric ("sail", "cloth")'                                   
-    tags: [noun]                                                                      
-                                                                                      
-  - word: nimblly                                                                     
-    back: 'flexible - agile - quick ("flexible", "agile")'                            
-    tags: [adverb]                                                                    
-                                                                                      
-  - word: woody                                                                       
-    back: 'wood - timber - bark ("wood", "timber")'                                   
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: shawl                                                                       
-    back: 'garment - wrap - cover ("garment", "wrap")'                                
-    tags: [noun]                                                                      
-                                                                                      
-  - word: cylinder                                                                    
-    back: 'cylindrical shape - tube - pipe ("cylindrical shape", "tube")'             
-    tags: [noun]                                                                      
-                                                                                      
-  - word: full                                                                        
-    back: 'complete - entire - whole ("complete", "entire")'                          
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: beppeched                                                                   
-    back: 'bent - curved - twisted ("bent", "curved")'                                
-    tags: [verb]                                                                      
-                                                                                      
-  - word: subdued                                                                     
-    back: 'calmed - pacified - quieted ("calmed", "pacified")'                        
-    tags: [verb]                                                                      
-                                                                                      
-  - word: dill-witted                                                                 
-    back: 'foolish - silly - stupid ("foolish", "silly")'                             
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: gull-like                                                                   
-    back: 'seagull - bird - aquatic ("seagull", "bird")'                              
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: sharp                                                                       
-    back: 'pointed - acute - keen ("pointed", "acute")'                               
-    tags: [adjective]                                                                 
-                                                                                      
-  - word: clay                                                                        
-    back: 'clay - soil - mud ("clay", "soil")'                                        
-    tags: [noun]                                                                      
-                                                                                      
-  - word: w:be                                                                        
-    back: 'bend - curve - flex ("bend", "curve")'                                     
-    tags: [verb]                                                                      
-                                                                                      
-  - word: bender                                                                      
-    back: 'bend - curve - flex ("bend", "curve")'                                     
-    tags: [noun]                                                                      
-                                                                                      
-  - word: scattering                                                                  
-    back: 'dispersion - distribution - spread ("dispersion", "distribution")'         
-    tags: [noun]                                                                      
-                                                                                      
-  - word: narrowed                                                                    
-    back: 'became narrower - constricted - reduced ("became narrower",                
-  "constricted")'                                                                     
-    tags: [verb]                                                                      
-                                                                                      
-  - word: unevenness                                                                  
-    back: 'irregularity - lack of smoothness - roughness ("irregularity", "lack of    
-  smoothness")'                                                                       
-    tags: [noun]                                                                      
-                                                                                      
-  - word: steady                                                                      
-    back: 'firm - stable - solid ("firm", "stable")'                                  
-    tags: [adjective]                                                                 
-  """                                                                                 
-                                                                                      
-  yaml_to_anki(yaml_content)                                                          
+  yaml_content                                                                        
  ──────────────────────────────────────────────────────────────────────────────────── 
-Out: /home/gespitia/projects/anki-ocr-agent/anki_cards.csv
-[Step 1: Duration 235.75 seconds| Input tokens: 3,486 | Output tokens: 1,460]
+Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
+impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
+- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
+'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
+Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
+Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
+"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
+'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
+{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
+Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
+Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
+"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
+'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
+'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
+Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
+Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
+= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
+'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
+lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
+'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
+'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
+Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
+lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
+'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
+'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
+'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
+'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
+Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
+'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
+'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
+'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
+Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
+'tags': 'Flujo = Flujo - Rápido'}]
+[Step 1: Duration 229.48 seconds| Input tokens: 3,784 | Output tokens: 880]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 2 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Error in code parsing:
-Your code snippet is invalid, because the regex pattern <code>(.*?)</code> was not 
-found in it.
-Here is your code snippet:
-The YAML content has been successfully converted into an Anki-ready CSV file. The 
-vocabulary words, definitions, and examples have been extracted and formatted 
-correctly. The task is now complete.</code>
-Make sure to include code with the correct pattern, for instance:
-Thoughts: Your thoughts
-<code>
-# Your python code here
-</code>
-Make sure to provide correct code blobs.
-[Step 2: Duration 177.73 seconds| Input tokens: 11,292 | Output tokens: 1,497]
+ ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
+  yaml_content = [                                                                    
+      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
+  impreso - Bon Journo - Griego - Chopper"},                                          
+      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
+  "Humor = Sujeto - Mirada - Vislazgo"},                                              
+      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
+  "Adquirido = Destacado - Arriado"},                                                 
+      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
+  "Cáscara = Alfar (Coke = Higo)"},                                                   
+      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
+  aéreo"},                                                                            
+      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
+  Hilezas - Fibra"},                                                                  
+      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
+  "Demasiado = Tilar - Alarma - Incompleto"},                                         
+      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
+  "Relajado = Acumulado - Redondo"},                                                  
+      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
+  "Ocioso = Ceja"},                                                                   
+      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
+  - Trocer"},                                                                         
+      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
+  Moral - Mochila"},                                                                  
+      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
+  Habilisite"},                                                                       
+      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
+  Cuerda - Habilisite"},                                                              
+      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
+  Cuerda - Habilisite"},                                                              
+      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
+  lana"},                                                                             
+      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
+      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
+      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
+  "tags": "Largo = Inciso"},                                                          
+      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
+  "Lleva = Sefiro - Visto"},                                                          
+      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
+  Lento"},                                                                            
+      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
+      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
+      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
+      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
+      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
+  "Especializado = Dividido"},                                                        
+      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
+  Cocinando"},                                                                        
+      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
+  Reducido"},                                                                         
+      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
+  "Irregular = Inverso"},                                                             
+      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
+  ]                                                                                   
+                                                                                      
+  yaml_content                                                                        
+ ──────────────────────────────────────────────────────────────────────────────────── 
+Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
+impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
+- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
+'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
+Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
+Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
+"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
+'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
+{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
+Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
+Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
+"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
+'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
+'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
+Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
+Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
+= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
+'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
+lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
+'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
+'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
+Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
+lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
+'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
+'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
+'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
+'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
+Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
+'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
+'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
+'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
+Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
+'tags': 'Flujo = Flujo - Rápido'}]
+[Step 2: Duration 260.84 seconds| Input tokens: 11,640 | Output tokens: 1,952]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 3 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
+  yaml_content = [                                                                    
+      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
+  impreso - Bon Journo - Griego - Chopper"},                                          
+      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
+  "Humor = Sujeto - Mirada - Vislazgo"},                                              
+      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
+  "Adquirido = Destacado - Arriado"},                                                 
+      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
+  "Cáscara = Alfar (Coke = Higo)"},                                                   
+      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
+  aéreo"},                                                                            
+      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
+  Hilezas - Fibra"},                                                                  
+      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
+  "Demasiado = Tilar - Alarma - Incompleto"},                                         
+      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
+  "Relajado = Acumulado - Redondo"},                                                  
+      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
+  "Ocioso = Ceja"},                                                                   
+      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
+  - Trocer"},                                                                         
+      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
+  Moral - Mochila"},                                                                  
+      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
+  Habilisite"},                                                                       
+      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
+  Cuerda - Habilisite"},                                                              
+      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
+  Cuerda - Habilisite"},                                                              
+      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
+  lana"},                                                                             
+      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
+      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
+      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
+  "tags": "Largo = Inciso"},                                                          
+      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
+  "Lleva = Sefiro - Visto"},                                                          
+      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
+  Lento"},                                                                            
+      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
+      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
+      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
+      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
+      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
+  "Especializado = Dividido"},                                                        
+      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
+  Cocinando"},                                                                        
+      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
+  Reducido"},                                                                         
+      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
+  "Irregular = Inverso"},                                                             
+      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
+  ]                                                                                   
+                                                                                      
+  yaml_content                                                                        
+ ──────────────────────────────────────────────────────────────────────────────────── 
+Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
+impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
+- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
+'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
+Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
+Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
+"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
+'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
+{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
+Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
+Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
+"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
+'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
+'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
+Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
+Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
+= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
+'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
+lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
+'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
+'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
+Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
+lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
+'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
+'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
+'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
+'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
+Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
+'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
+'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
+'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
+Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
+'tags': 'Flujo = Flujo - Rápido'}]
+[Step 3: Duration 82.85 seconds| Input tokens: 19,832 | Output tokens: 3,024]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 4 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
+  yaml_content = [                                                                    
+      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
+  impreso - Bon Journo - Griego - Chopper"},                                          
+      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
+  "Humor = Sujeto - Mirada - Vislazgo"},                                              
+      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
+  "Adquirido = Destacado - Arriado"},                                                 
+      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
+  "Cáscara = Alfar (Coke = Higo)"},                                                   
+      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
+  aéreo"},                                                                            
+      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
+  Hilezas - Fibra"},                                                                  
+      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
+  "Demasiado = Tilar - Alarma - Incompleto"},                                         
+      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
+  "Relajado = Acumulado - Redondo"},                                                  
+      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
+  "Ocioso = Ceja"},                                                                   
+      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
+  - Trocer"},                                                                         
+      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
+  Moral - Mochila"},                                                                  
+      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
+  Habilisite"},                                                                       
+      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
+  Cuerda - Habilisite"},                                                              
+      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
+  Cuerda - Habilisite"},                                                              
+      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
+  lana"},                                                                             
+      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
+      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
+      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
+  "tags": "Largo = Inciso"},                                                          
+      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
+  "Lleva = Sefiro - Visto"},                                                          
+      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
+  Lento"},                                                                            
+      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
+      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
+      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
+      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
+      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
+  "Especializado = Dividido"},                                                        
+      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
+  Cocinando"},                                                                        
+      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
+  Reducido"},                                                                         
+      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
+  "Irregular = Inverso"},                                                             
+      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
+  ]                                                                                   
+                                                                                      
+  yaml_content                                                                        
+ ──────────────────────────────────────────────────────────────────────────────────── 
+Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
+impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
+- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
+'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
+Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
+Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
+"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
+'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
+{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
+Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
+Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
+"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
+'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
+'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
+Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
+Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
+= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
+'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
+lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
+'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
+'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
+Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
+lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
+'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
+'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
+'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
+'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
+Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
+'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
+'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
+'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
+Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
+'tags': 'Flujo = Flujo - Rápido'}]
+[Step 4: Duration 89.40 seconds| Input tokens: 28,024 | Output tokens: 4,096]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Step 5 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ─ Executing parsed code: ─────────────────────────────────────────────────────────── 
+  yaml_content = [                                                                    
+      {"word": "Whether", "back": "'Si - Tonto - Sincero'", "tags": "Si = Humor       
+  impreso - Bon Journo - Griego - Chopper"},                                          
+      {"word": "Wit", "back": "'Humor - Excepción - Desaparecer - Chopper'", "tags":  
+  "Humor = Sujeto - Mirada - Vislazgo"},                                              
+      {"word": "Acquired", "back": "'Adquirido - Iniciado - Iniciante'", "tags":      
+  "Adquirido = Destacado - Arriado"},                                                 
+      {"word": "Lattice", "back": "'Cáscara - Oxidado - Estimulante'", "tags":        
+  "Cáscara = Alfar (Coke = Higo)"},                                                   
+      {"word": "Stack", "back": "'Pila - Mantas - Camarón'", "tags": "Pila = Corteza  
+  aéreo"},                                                                            
+      {"word": "Quill", "back": "'Cilindro - Corteza - Fibra'", "tags": "Cilindro =   
+  Hilezas - Fibra"},                                                                  
+      {"word": "Fenix", "back": "'Demasiado - Alarma - Incompleto'", "tags":          
+  "Demasiado = Tilar - Alarma - Incompleto"},                                         
+      {"word": "Loosed", "back": "'Relajado - Acumulado - Redondo'", "tags":          
+  "Relajado = Acumulado - Redondo"},                                                  
+      {"word": "Thickly", "back": "'Ocioso - Grueso - Distantemente'", "tags":        
+  "Ocioso = Ceja"},                                                                   
+      {"word": "Fencing", "back": "'Sobrino de - Basio'", "tags": "Sobrino = Acotar   
+  - Trocer"},                                                                         
+      {"word": "Drogsack", "back": "'Colgado - Moral - Mochila'", "tags": "Colgado =  
+  Moral - Mochila"},                                                                  
+      {"word": "Sloppy", "back": "'Terco - Lastilla'", "tags": "Terco = Agente -      
+  Habilisite"},                                                                       
+      {"word": "Spang", "back": "'Sellier (Cuerda & Spang)'", "tags": "Sellier =      
+  Cuerda - Habilisite"},                                                              
+      {"word": "Nimbly", "back": "'Agilmente - Habilisite'", "tags": "Agilmente =     
+  Cuerda - Habilisite"},                                                              
+      {"word": "Woolly", "back": "'Cuello de lana'", "tags": "Cuello = Cuello de      
+  lana"},                                                                             
+      {"word": "Shawl", "back": "'Cuello'", "tags": "Cuello = Cuello"},               
+      {"word": "Sinder", "back": "'Delgado - Plano'", "tags": "Delgado = Inciso"},    
+      {"word": "Full", "back": "'Largo - de cuerpo entero - Largo - Hilo - Logato'",  
+  "tags": "Largo = Inciso"},                                                          
+      {"word": "Beepbecheld", "back": "'que lleva Sefiro - que usa, Visto'", "tags":  
+  "Lleva = Sefiro - Visto"},                                                          
+      {"word": "Subdued", "back": "'Frenecido por un lento'", "tags": "Frenecido =    
+  Lento"},                                                                            
+      {"word": "Gull-like", "back": "'Cuello - Novo'", "tags": "Cuello = Novo"},      
+      {"word": "Sharp", "back": "'Cuerdo'", "tags": "Cuerdo = Cuerdo"},               
+      {"word": "Clay", "back": "'Línea'", "tags": "Línea = Línea"},                   
+      {"word": "Wish", "back": "'Anillo'", "tags": "Anillo = Anillo"},                
+      {"word": "Bordered", "back": "'Especializado - Dividido'", "tags":              
+  "Especializado = Dividido"},                                                        
+      {"word": "Scattering", "back": "'Cocinando'", "tags": "Cocinando =              
+  Cocinando"},                                                                        
+      {"word": "Narrowed", "back": "'Anormal - Reducido'", "tags": "Anormal =         
+  Reducido"},                                                                         
+      {"word": "Unevenness", "back": "'Irregular - Cerrada - Inverso'", "tags":       
+  "Irregular = Inverso"},                                                             
+      {"word": "Steadily", "back": "'Flujo'", "tags": "Flujo = Flujo - Rápido"}       
+  ]                                                                                   
+                                                                                      
+  yaml_content                                                                        
+ ──────────────────────────────────────────────────────────────────────────────────── 
+Out: [{'word': 'Whether', 'back': "'Si - Tonto - Sincero'", 'tags': 'Si = Humor 
+impreso - Bon Journo - Griego - Chopper'}, {'word': 'Wit', 'back': "'Humor - Excepción
+- Desaparecer - Chopper'", 'tags': 'Humor = Sujeto - Mirada - Vislazgo'}, {'word': 
+'Acquired', 'back': "'Adquirido - Iniciado - Iniciante'", 'tags': 'Adquirido = 
+Destacado - Arriado'}, {'word': 'Lattice', 'back': "'Cáscara - Oxidado - 
+Estimulante'", 'tags': 'Cáscara = Alfar (Coke = Higo)'}, {'word': 'Stack', 'back': 
+"'Pila - Mantas - Camarón'", 'tags': 'Pila = Corteza aéreo'}, {'word': 'Quill', 
+'back': "'Cilindro - Corteza - Fibra'", 'tags': 'Cilindro = Hilezas - Fibra'}, 
+{'word': 'Fenix', 'back': "'Demasiado - Alarma - Incompleto'", 'tags': 'Demasiado = 
+Tilar - Alarma - Incompleto'}, {'word': 'Loosed', 'back': "'Relajado - Acumulado - 
+Redondo'", 'tags': 'Relajado = Acumulado - Redondo'}, {'word': 'Thickly', 'back': 
+"'Ocioso - Grueso - Distantemente'", 'tags': 'Ocioso = Ceja'}, {'word': 'Fencing', 
+'back': "'Sobrino de - Basio'", 'tags': 'Sobrino = Acotar - Trocer'}, {'word': 
+'Drogsack', 'back': "'Colgado - Moral - Mochila'", 'tags': 'Colgado = Moral - 
+Mochila'}, {'word': 'Sloppy', 'back': "'Terco - Lastilla'", 'tags': 'Terco = Agente - 
+Habilisite'}, {'word': 'Spang', 'back': "'Sellier (Cuerda & Spang)'", 'tags': 'Sellier
+= Cuerda - Habilisite'}, {'word': 'Nimbly', 'back': "'Agilmente - Habilisite'", 
+'tags': 'Agilmente = Cuerda - Habilisite'}, {'word': 'Woolly', 'back': "'Cuello de 
+lana'", 'tags': 'Cuello = Cuello de lana'}, {'word': 'Shawl', 'back': "'Cuello'", 
+'tags': 'Cuello = Cuello'}, {'word': 'Sinder', 'back': "'Delgado - Plano'", 'tags': 
+'Delgado = Inciso'}, {'word': 'Full', 'back': "'Largo - de cuerpo entero - Largo - 
+Hilo - Logato'", 'tags': 'Largo = Inciso'}, {'word': 'Beepbecheld', 'back': "'que 
+lleva Sefiro - que usa, Visto'", 'tags': 'Lleva = Sefiro - Visto'}, {'word': 
+'Subdued', 'back': "'Frenecido por un lento'", 'tags': 'Frenecido = Lento'}, {'word': 
+'Gull-like', 'back': "'Cuello - Novo'", 'tags': 'Cuello = Novo'}, {'word': 'Sharp', 
+'back': "'Cuerdo'", 'tags': 'Cuerdo = Cuerdo'}, {'word': 'Clay', 'back': "'Línea'", 
+'tags': 'Línea = Línea'}, {'word': 'Wish', 'back': "'Anillo'", 'tags': 'Anillo = 
+Anillo'}, {'word': 'Bordered', 'back': "'Especializado - Dividido'", 'tags': 
+'Especializado = Dividido'}, {'word': 'Scattering', 'back': "'Cocinando'", 'tags': 
+'Cocinando = Cocinando'}, {'word': 'Narrowed', 'back': "'Anormal - Reducido'", 'tags':
+'Anormal = Reducido'}, {'word': 'Unevenness', 'back': "'Irregular - Cerrada - 
+Inverso'", 'tags': 'Irregular = Inverso'}, {'word': 'Steadily', 'back': "'Flujo'", 
+'tags': 'Flujo = Flujo - Rápido'}]
+[Step 5: Duration 92.40 seconds| Input tokens: 36,216 | Output tokens: 5,168]
+Reached max steps.
+[Step 6: Duration 109.90 seconds| Input tokens: 44,408 | Output tokens: 6,358]
+
+✅ Agent execution completed!
+Agent run returned: Based on the provided image, here is the extracted vocabulary content formatted as YAML:
+
+```yaml
+- word: Whether
+  back: 'Si - Tonto - Sincero' ("Si es cierto", "No es tonto")
+  tags: noun
+- word: Wit
+  back: 'Humor - Excepción - Desaparecer - Chopper' ("El humor es una excepción", "El chopper desapareció")
+  tags: noun
+- word: Acquired
+  back: 'Adquirido - Iniciado - Iniciante' ("Adquirido el libro", "Iniciado el proyecto")
+  tags: verb
+- word: Lattice
+  back: 'Cáscara - Oxidado - Estimulante' ("La cáscara es oxidada", "El estimulante es oxidado")
+  tags: noun
+- word: Stack
+  back: 'Pila - Mantas - Camarón' ("La pila de libros", "Las mantas de algodón")
+  tags: noun
+- word: Quill
+  back: 'Cilindro - Corteza - Fibra' ("El cilindro es de corteza", "La fibra es de corteza")
+  tags: noun
+- word: Fenix
+  back: 'Demasiado - Alarma - Incompleto' ("Demasiado rápido", "La alarma es incompleta")
+  tags: adjective
+- word: Loosed
+  back: 'Relajado - Acumulado - Redondo' ("El relajado es redondo", "El acumulado es redondo")
+  tags: adjective
+- word: Thickly
+  back: 'Ocioso - Grueso - Distantemente' ("El ocioso es grueso", "El ocioso es distante")
+  tags: adverb
+- word: Fencing
+  back: 'Sobrino de - Basio' ("El sobrino de Basio", "Basio es un sobrino")
+  tags: noun
+- word: Drogsack
+  back: 'Colgado - Moral - Mochila' ("El drogsack es colgado", "La mochila es moral")
+  tags: noun
+- word: Sloppy
+  back: 'Terco - Lastilla' ("El terco es lastilla", "La lastilla es terca")
+  tags: adjective
+- word: Spang
+  back: 'Sellier (Cuerda & Spang)' ("El sellier es cuerda y spang", "El spang es cuerda")
+  tags: noun
+- word: Nimbly
+  back: 'Agilmente - Habilisite' ("El agilmente es habilisite", "El agilmente es habilisite")
+  tags: adverb
+- word: Woolly
+  back: 'Cuello de lana' ("El cuello de lana", "El cuello de lana")
+  tags: noun
+- word: Shawl
+  back: 'Cuello' ("El cuello", "El cuello")
+  tags: noun
+- word: Sinder
+  back: 'Delgado - Plano' ("El sinder es delgado", "El sinder es plano")
+  tags: adjective
+- word: Full
+  back: 'Largo - de cuerpo entero - Largo - Hilo - Logato' ("El full es largo", "El full es de cuerpo entero")
+  tags: noun
+- word: Beepbecheld
+  back: 'que lleva Sefiro - que usa, Visto' ("El beepbecheld lleva Sefiro", "El beepbecheld usa, visto")
+  tags: verb
+- word: Subdued
+  back: 'Frenecido por un lento' ("El subdewed es frenecido por un lento", "El subdewed es lento")
+  tags: adjective
+- word: Gull-like
+  back: 'Cuello - Novo' ("El gull-like es cuello", "El gull-like es novo")
+  tags: adjective
+- word: Sharp
+  back: 'Cuerdo' ("El sharp es cuerdo", "El sharp es cuerdo")
+  tags: adjective
+- word: Clay
+  back: 'Línea' ("El clay es línea", "El clay es línea")
+  tags: noun
+- word: Wish
+  back: 'Anillo' ("El wish es anillo", "El wish es anillo")
+  tags: noun
+- word: Bordered
+  back: 'Especializado - Dividido' ("El bordered es especializado", "El bordered es dividido")
+  tags: adjective
+- word: Scattering
+  back: 'Cocinando' ("El scattering es cocinando", "El scattering es cocinando")
+  tags: verb
+- word: Narrowed
+  back: 'Anormal - Reducido' ("El narrowed es anormal", "El narrowed es reducido")
+  tags: adjective
+- word: Unevenness
+  back: 'Irregular - Cerrada - Inverso' ("El unevenness es irregular", "El unevenness es cerrada")
+  tags: noun
+- word: Steadily
+  back: 'Flujo' ("El steadily es flujo", "El steadily es flujo")
+  tags: adverb
+```
+📊 Generated CSV with 2 lines (including header)
+📄 Output file: /home/gespitia/projects/anki-ocr-agent/anki_cards.csv
+
+📋 Generated vocabulary preview:
+   Header: Word,Back,Tags
+   Word 1: test
+
+⚠️ Very little content generated (1 words)

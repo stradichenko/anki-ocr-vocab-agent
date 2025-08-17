@@ -65,16 +65,50 @@ def process_vocab_image(image_path: str):
         print(f"❌ Failed to load image: {e}")
         raise
 
-    # Construct message for vision processing
+    # Construct message for vision processing - improved based on smolagents best practices
     user_message = (
-        f"Analyze this vocabulary image and extract real vocabulary words, definitions, and examples.\n\n"
-        f"CRITICAL: Extract ONLY what you actually see in the image and do it only once. If the word is repeated, skip it."
-        f"DO NOT generate placeholder content like 'word1', 'word2', 'definition1'.\n\n"
-        f"Format as YAML:\n"
-        f"- word: [actual word]\n"
-        f"  back: '[real definition] (\"[real example 1]\", \"[real example 2]\")'\n"
-        f"  tags: [part of speech]\n\n"
-        f"Then call yaml_to_anki(yaml_content) with your extracted YAML."
+        f"You are a vocabulary extraction specialist. Your task is to analyze the provided vocabulary image "
+        f"and extract REAL vocabulary words with their definitions and examples.\n\n"
+        f"There are three image scenarios: \n"
+        f"1) handwritten notes on vocabulary and some related information to the vocabulary terms; \n"
+        f"2) printed text with highlighted words in color blue [vocabulary].\n"
+        f"3) just a list of vocabulary words word1, word2, word3.\n\n"
+
+        f"CRITICAL REQUIREMENTS:\n"
+        f"1. Extract ONLY what you actually see in the image - no placeholder content\n"
+        f"2. DO NOT read the same definition more than once\n"
+        f"3. If a word appears multiple times, include it only once\n"
+        f"4. DO NOT generate fake content like 'word1', 'word2', 'definition1', 'example1'\n"
+        f"5. DO NOT attempt to import Python libraries\n"
+        f"6. Focus on complete, meaningful vocabulary entries only\n\n"
+
+        f"EXPECTED INPUT: A vocabulary page containing real words with definitions and example sentences in the same language of the vocabulary word\n\n"
+
+        f"OUTPUT FORMAT: You must format your extracted content as valid YAML with this exact structure:\n"
+        f"```yaml\n"
+        f"- word: [actual_word_from_image]\n"
+        f"  back: '[complete_definition_from_image] (\"[example_sentence_1]\", \"[example_sentence_2]\")'\n"
+        f"  tags: [part_of_speech]\n"
+        f"```\n\n"
+        
+        f"IMPORTANT NOTES:\n"
+        f"- Use single quotes around the 'back' field value to handle embedded quotes properly\n"
+        f"- Include 2-3 example sentences in double quotes within the definition if available\n"
+        f"- Valid tags include: noun, verb, adjective, adverb, preposition, conjunction, etc.\n"
+        f"- Ensure proper YAML indentation (2 spaces)\n\n"
+        
+        f"WORKFLOW:\n"
+        f"1. Carefully examine the image for vocabulary words and their definitions\n"
+        f"2. Extract each word with its complete definition and examples\n"
+        f"3. Format the extracted content as YAML following the structure above\n"
+        f"4. Once text has been extracted call yaml_to_anki(yaml_content) with your properly formatted YAML string, so it formats the content for Anki\n\n"
+
+        f"ERROR HANDLING:\n"
+        f"- If you cannot read text clearly, skip that entry rather than guessing\n"
+        f"- If no vocabulary content is found, return an empty YAML list: []\n"
+        f"- If YAML formatting fails, double-check quote escaping and indentation\n\n"
+        
+        f"Remember: Quality over quantity. Extract only what you can clearly read and understand from the image."
     )
 
     print("\n🚀 Starting agent execution with vision...")
