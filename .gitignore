@@ -5,6 +5,7 @@ demo/*
 agent_self_test.txt
 agent_output_stderr.txt
 processed_images.json
+output/*
 
 # Python
 __pycache__/

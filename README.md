@@ -1,25 +1,10 @@
-# Anki OCR vocab agent
+# Anki OCR Vocab Agent
 
-This is a an easy 'n quick tool to create anki vocab cards using agents (smolagent library) and a visual model (`qwen2.5-vl`).
+This is an easy 'n quick tool to create Anki vocab cards using agents (`smolagent` library) and a visual model (`qwen2.5-vl`).
 
 ---
 
-# What you'll end up with
-
-Folder layout:
-
-```
-anki-ocr-agent/
-├── .venv/                 # Python virtual env (auto-created by you)
-├── vocab_ocr_agent.py     # the unified pipeline script
-├── input/
-│   └── *.png, *.jpg       # put your scanned images here
-├── anki_cards.csv         # will be created after running the script
-├── agent_output.txt       # automatic execution log (auto-created)
-└── processed_images.json  # tracking log for processed images
-```
-
-# Features
+## Features
 
 - **Batch Processing**: Automatically processes ALL images in the `input/` directory
 - **Smart Tracking**: Remembers which images have been successfully processed
@@ -27,22 +12,44 @@ anki-ocr-agent/
 - **Automatic Logging**: All output is automatically saved to `agent_output.txt`
 - **Vision Processing**: Uses Qwen2.5-VL for OCR and vocabulary extraction
 - **Image Preprocessing**: Automatic image enhancement for better OCR accuracy
-  - Intelligent resizing to optimal dimensions
-  - Contrast enhancement for better text visibility
-  - Noise reduction to clean up image artifacts
-  - Sharpening filters to improve text clarity
-  - Compression optimization for faster processing
+    - resizing to optimal dimensions
+    - Contrast enhancement for better text visibility
+    - Noise reduction to clean up image artifacts
+    - Sharpening filters to improve text clarity
+    - Compression optimization for faster processing
 - **YAML to CSV**: Converts extracted vocabulary to Anki-ready format
 - **Error Handling**: Comprehensive error handling with fallback options
 - **Configurable**: Easy customization of preprocessing settings
 
-# Step-by-step
+
+## What You'll End Up With
+
+Folder layout:
+
+```
+anki-ocr-agent/
+├── .venv/                   # Python virtual environment (auto-created)
+├── vocab_ocr_agent.py       # main pipeline script
+├── input/                   # put your scanned images here (PNG, JPG, etc.)
+│   └── *.png, *.jpg, ...
+├── output/                  # stores all outputs and logs
+│   ├── processed_images/    # processed images (by config)
+│   ├── my_debug/            # optional: intermediate/debug images
+│   ├── anki_cards.csv       # generated Anki-ready vocabulary cards
+│   ├── agent_output.txt     # execution log (auto-created)
+│   ├── agent_output_stderr.txt  # error log (auto-created)
+│   └── processed_images.json    # processing/tracking log
+```
+
+
+## Step-by-step
+
 
 ## 1) Create a project folder
 
 ```bash
-mkdir -p ~/anki-ocr-agent/input
-cd ~/anki-ocr-agent
+git clone https://github.com/stradichenko/anki-ocr-agent.git
+cd anki-ocr-agent
 ```
 
 ## 2) (If needed) Install Ollama and pull the model
@@ -89,9 +96,7 @@ As long as ollama is running on port 11434, your venv’s Python scripts will be
 
 ```bash
 pip install --upgrade pip
-pip install smolagents pyyaml
 pip install smolagents[litellm] pyyaml
-
 ```
 
 
@@ -101,16 +106,6 @@ Example:
 
 ```bash
 cp /path/to/your/scan.png input/vocabulary_page.png
-```
-
-## 7) Put your vocabulary images in `./input/`
-
-You can now add multiple images:
-
-```bash
-cp /path/to/your/scan1.png input/
-cp /path/to/your/scan2.jpg input/
-cp /path/to/your/scan3.jpeg input/
 ```
 
 The script supports: PNG, JPG, JPEG, GIF, BMP, WebP, TIFF formats.
@@ -137,87 +132,7 @@ What happens:
 6. Appends new vocabulary to **`anki_cards.csv`**
 7. Updates the processing log with success/failure status
 
-# Tracking System
-
-The script maintains a `processed_images.json` file that tracks:
-- Which images have been processed
-- When they were processed
-- Whether processing was successful
-- Any error messages from failed processing
-
-This ensures:
-- ✅ No duplicate processing of the same image
-- ✅ You can add new images anytime and only new ones get processed
-- ✅ Failed images can be retried by removing them from the tracking log
-
-# Logging
-
-The script automatically creates detailed logs:
-- `agent_output.txt` - Complete execution log with all output
-- `agent_output_stderr.txt` - Error messages and stack traces (if any)
-- `processed_images.json` - Processing history and status for each image
-
-# Example Usage
-
-```bash
-# First run: processes image1.png and image2.jpg
-python vocab_ocr_agent.py
-
-# Add more images
-cp newvocab.png input/
-
-# Second run: only processes newvocab.png (skips previous images)
-python vocab_ocr_agent.py
-
-# Force reprocess a specific image (bypasses tracking)
-python vocab_ocr_agent.py input/image1.png
-```
-
-# Processing Status
-
-After each run, you'll see a summary like:
-```
-📊 Processing Summary:
-   🔍 Total images found: 5
-   ✅ Already processed: 3
-   🆕 New images to process: 2
-
-📊 Overall stats: 4 successful, 1 failed out of 5 total
-```
-
----
-
-# Common bumps & quick fixes
-
-* \*\*“YAML error: found character ‘`’…”**  
-  That means the model wrapped the YAML in triple backticks. Quick fix: strip them before parsing.
-  In `YamlToAnkiTool.forward`, add this right before `yaml.safe\_load(yaml\_content)\`:
-
-  ````python
-  yaml_content = yaml_content.strip()
-  if yaml_content.startswith("```") and yaml_content.endswith("```"):
-      yaml_content = yaml_content[3:-3].strip()
-  ````
-
-* **CSV not created**
-  Rerun. Also ensure the prompt asks the agent to “use the `yaml_to_anki` tool”.
-  (The unified script I gave already nudges it to call the tool.)
-
-* **Slow on old CPU**
-  That’s normal for VLMs. Start with smaller/clean images, and keep just the vocab area if you can.
-
-* **Different model tag**
-  If you pulled a different tag, just change:
-
-  ```python
-  model = OllamaModel("qwen2.5-vl:7b")
-  ```
-
-  to whatever `ollama list` shows you.
-
----
-
-# TL;DR command list
+## TL;DR command list
 
 ```bash
 # 1) Setup
@@ -233,8 +148,7 @@ sudo systemctl enable --now ollama
 ollama pull qwen2.5-vl:7b
 
 # 3) Add your script and image
-#   - save vocab_ocr_agent.py here
-#   - put your image at ./input/vocabulary_page.png
+#   - put your image at ./input/
 
 # 4) Run
 python vocab_ocr_agent.py
@@ -242,62 +156,36 @@ python vocab_ocr_agent.py
 # 5) Import anki_cards.csv into Anki
 ```
 
-If you want, I can also give you a **batch mode** version (process all images in `./input/`) or wire it to **AnkiConnect** so it imports automatically after generating the CSV.
+# Tracking System
 
+The script maintains a `processed_images.json` file that tracks:
+- Which images have been processed
+- When they were processed
+- Whether processing was successful
+- Any error messages from failed processing
 
----
+# Logging
 
-### 🔧 How to use
+The script automatically creates detailed logs:
+- `agent_output.txt` - Complete execution log with all output
+- `agent_output_stderr.txt` - Error messages and stack traces (if any)
+- `processed_images.json` - Processing history and status for each image
 
-1. Put this script as `vocab_ocr_agent.py` in your working folder.
+# Processing Status
 
-2. Run **normal (batch) mode**:
+After each run, you'll see a summary like:
+```
+📊 Processing Summary:
+   🔍 Total images found: 5
+   ✅ Already processed: 3
+   🆕 New images to process: 2
 
-   ```bash
-   python vocab_ocr_agent.py --input ./images --output vocab.md
-   ```
+📊 Overall stats: 4 successful, 1 failed out of 5 total
+```
 
-   → Processes all images in `./images` once.
+## Image Preprocessing
 
-3. Run in **auto-watch mode**:
-
-   ```bash
-   python vocab_ocr_agent.py --input ./images --output vocab.md --watch
-   ```
-
-   → Keeps watching `./images`. Whenever you drop a new `.png/.jpg/.jpeg`, it auto-extracts and appends results to `vocab.md`.
-
----
-
-# Image Preprocessing
-
-The script automatically applies image preprocessing to improve OCR accuracy:
-
-## Preprocessing Steps
-1. **Resize**: Scales down large images to optimal dimensions (default: 2048x2048 max)
-2. **Contrast Enhancement**: Improves text visibility (configurable factor)
-3. **Noise Reduction**: Removes image artifacts using Gaussian blur
-4. **Sharpening**: Enhances text edges for better recognition
-5. **Compression**: Optimizes file size for faster processing
-
-## Choosing the Right Configuration
-
-The script includes several preset configurations optimized for different scenarios:
-
-### Available Presets
-
-| Config | Best For | Speed | Quality | File Size | Description |
-|--------|----------|-------|---------|-----------|-------------|
-| **MINIMAL_CONFIG** | Testing/Debug | ⚡⚡⚡ | ⭐ | Original | No preprocessing - uses original image |
-| **FAST_CONFIG** | Quick processing | ⚡⚡ | ⭐⭐ | Small | Light processing with JPEG compression |
-| **OPTIMIZED_CONFIG** | Most images | ⚡ | ⭐⭐⭐ | Medium | Balanced quality/speed, resizes to 1024x768 |
-| **OCR_OPTIMIZED_CONFIG** | Text-heavy images | ⚡ | ⭐⭐⭐⭐ | Small | Aggressive text enhancement, resizes to 800x600 |
-| **QUALITY_CONFIG** | High-quality scans | ⭐ | ⭐⭐⭐⭐⭐ | Large | Maximum quality processing |
-
-
-
-## Switching Configurations
-
+The script automatically applies image preprocessing to improve OCR accuracy.
 To change the preprocessing configuration, edit `vocab_ocr_agent.py`:
 
 ```python
@@ -308,34 +196,28 @@ processed_image, processing_summary = preprocess_image_for_ocr(image_path, QUALI
 processed_image, processing_summary = preprocess_image_for_ocr(image_path, OCR_OPTIMIZED_CONFIG)
 ```
 
-## Debug Mode
+### Preprocessing Steps
+1. **Resize**: Scales down large images to optimal dimensions (default: 2048x2048 max)
+2. **Contrast Enhancement**: Improves text visibility (configurable factor)
+3. **Noise Reduction**: Removes image artifacts using Gaussian blur
+4. **Sharpening**: Enhances text edges for better recognition
+5. **Compression**: Optimizes file size for faster processing
 
-Enable debug mode to save intermediate processing steps:
+### Choosing the Right Configuration
 
-```python
-# In core/image_config.py
-save_intermediate_steps: bool = True
-save_processed_image: bool = True  # Also save final processed image
-```
+The script includes several preset configurations optimized for different scenarios:
 
-This saves each preprocessing step to `output/preprocessing_debug/` for analysis:
-```
-output/preprocessing_debug/
-├── 01_original.png         # Original image
-├── 02_resized.png          # After resizing
-├── 03_contrast.png         # After contrast enhancement
-├── 04_denoised.png         # After noise reduction
-├── 05_sharpened.png        # After sharpening
-└── 06_compressed.png       # Final compressed result
-```
+#### Available Presets
 
-Additionally, the final processed images are saved to `output/processed_images/`:
-```
-output/processed_images/
-├── vocabulary_page_processed.jpeg    # Final processed image sent to OCR
-├── notes_scan_processed.jpeg         # Another processed image
-└── ...
-```
+| Config | Best For | Speed | Quality | File Size | Description |
+|--------|----------|-------|---------|-----------|-------------|
+| **MINIMAL_CONFIG** | Testing/Debug | ⚡⚡⚡ | ⭐ | Original | No preprocessing - uses original image |
+| **FAST_CONFIG** | Quick processing | ⚡⚡ | ⭐⭐ | Small | Light processing with JPEG compression |
+| **OPTIMIZED_CONFIG** | Most images | ⚡ | ⭐⭐⭐ | Medium | Balanced quality/speed, resizes to 1024x768 |
+| **OCR_OPTIMIZED_CONFIG** | Text-heavy images | ⚡ | ⭐⭐⭐⭐ | Small | Aggressive text enhancement, resizes to 800x600 |
+| **QUALITY_CONFIG** | High-quality scans | ⭐ | ⭐⭐⭐⭐⭐ | Large | Maximum quality processing |
+
+
 
 ## Expected Results by Config
 
@@ -380,9 +262,9 @@ The script shows detailed preprocessing statistics:
 
 ---
 
-# Customization
+## Customization
 
-## Creating Custom Image Preprocessing
+### Creating Custom Image Preprocessing
 
 You can create your own preprocessing configuration for specific needs:
 
@@ -422,33 +304,33 @@ CUSTOM_CONFIG = ImagePreprocessingConfig(
 processed_image, summary = preprocess_image_for_ocr(image_path, CUSTOM_CONFIG)
 ```
 
-## Fine-tuning Parameters
+### Fine-tuning Parameters
 
-### Contrast Factor
+#### Contrast Factor
 - `1.0` = No change
 - `1.2-1.4` = Good for most images
 - `1.5-2.0` = For very low contrast images
 - `>2.0` = May cause artifacts
 
-### Noise Reduction Radius
+#### Noise Reduction Radius
 - `0` = No noise reduction
 - `0.1-0.3` = Light smoothing, preserves text
 - `0.4-0.7` = Moderate smoothing
 - `>0.8` = Heavy smoothing, may blur text
 
-### Sharpening Factor
+#### Sharpening Factor
 - `1.0` = No sharpening
 - `1.2-1.5` = Good for most text
 - `1.6-2.0` = Strong sharpening for blurry images
 - `>2.0` = May create artifacts
 
-### JPEG Quality
+#### JPEG Quality
 - `60-70` = Small files, some quality loss
 - `75-85` = Good balance
 - `85-95` = High quality, larger files
 - `95-100` = Maximum quality
 
-## Image Type Recommendations
+### Image Type Recommendations
 
 **For book/document photos:**
 ```python
