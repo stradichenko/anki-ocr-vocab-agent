@@ -33,7 +33,7 @@ def create_vocab_agent(
         max_steps=max_steps,
         verbosity_level=verbosity_level,
         add_base_tools=False,
-        additional_authorized_imports=['io', 'yaml', 'PIL', 'csv']
+        additional_authorized_imports=['io', 'yaml', 'PIL', 'csv', 'os']
     )
     
     return agent

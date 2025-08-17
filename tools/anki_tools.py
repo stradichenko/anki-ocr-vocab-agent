@@ -17,8 +17,11 @@ def yaml_to_anki(yaml_content: str) -> str:
     Returns:
         Path to the generated anki CSV file
     """
-    OUTPUT_FILE = "anki_cards.csv"
+    OUTPUT_FILE = "output/anki_cards.csv"
     
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+
     def is_proper_name(word: str) -> bool:
         return bool(re.match(r'^[A-Z]', str(word).strip()))
     

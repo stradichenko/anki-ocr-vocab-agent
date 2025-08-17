@@ -25,7 +25,7 @@ def print_agent_debug_info(agent, image_path, image=None):
         print(f"   🖼️  PIL Image: {image.size} {image.mode}")
     print(f"   ⚙️  Model config: flatten_messages_as_text={getattr(agent.model, 'flatten_messages_as_text', 'unknown')}")
 
-def analyze_csv_output(csv_path="anki_cards.csv"):
+def analyze_csv_output(csv_path="output/anki_cards.csv"):
     """Analyze and report on generated CSV output."""
     if os.path.exists(csv_path):
         with open(csv_path, 'r', encoding='utf-8') as f:
@@ -55,7 +55,7 @@ def analyze_csv_output(csv_path="anki_cards.csv"):
         elif len(lines) <= 2:
             print(f"\n⚠️ Very little content generated ({len(lines)-1} words)")
     else:
-        print("⚠️ No anki_cards.csv file was created - agent failed completely")
+        print("⚠️ No output/anki_cards.csv file was created - agent failed completely")
 
 def run_comprehensive_self_test():
     """
@@ -66,11 +66,14 @@ def run_comprehensive_self_test():
     print("🔧 COMPREHENSIVE SELF-TEST SUITE")
     print("="*80)
     
+    # Ensure output directory exists
+    os.makedirs("output", exist_ok=True)
+    
     # Test 1: Basic file operations
     print("\n📁 TEST 1: File Operations")
     print("-" * 40)
     
-    test_path = "agent_self_test.txt"
+    test_path = "output/agent_self_test.txt"
     test_content = "agent self-test: comprehensive check\nLine 2: UTF-8 encoding test: áéíóú ñ\nLine 3: timestamp=" + str(os.path.getmtime(__file__) if os.path.exists(__file__) else "unknown")
     
     try:

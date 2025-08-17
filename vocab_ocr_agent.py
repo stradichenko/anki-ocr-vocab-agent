@@ -53,12 +53,14 @@ class TeeOutput:
 class ImageProcessingTracker:
     """Track which images have been successfully processed."""
     
-    def __init__(self, log_file="processed_images.json"):
+    def __init__(self, log_file="output/processed_images.json"):
         self.log_file = log_file
         self.processed_images = self._load_log()
     
     def _load_log(self):
         """Load processing history from JSON file."""
+        # Ensure output directory exists
+        os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
         if os.path.exists(self.log_file):
             try:
                 with open(self.log_file, 'r', encoding='utf-8') as f:
@@ -185,17 +187,16 @@ def process_vocab_image(image_path: str, tracker: ImageProcessingTracker):
         # Construct message for vision processing - improved to avoid syntax errors
         user_message = (
             f"You are a vocabulary extraction specialist. Your task is to analyze the provided vocabulary image "
-            f"and extract REAL vocabulary words with their definitions and examples.\n\n"
+            f"Providing definitions and examples, in the same language as the vocabulary word\n\n"
             f"You will encounter 3 different types of images:\n\n"
             f"1. Vocabulary pages with multiple words and definitions\n"
             f"2. Lists of vocabulary words\n"
-            f"3. Images of printed texts with vocabulary words highlighted in blue\n\n"
+            f"3. Printed pages with desired vocabulary words highlighted in blue (ignore other content)\n\n"
 
             f"CRITICAL REQUIREMENTS:\n"
             f"1. Extract ONLY what you actually see in the image - no placeholder content\n"
             f"2. DO NOT read the same definition more than once\n"
             f"3. If a word appears multiple times, include it only once\n"
-            f"4. DO NOT generate fake content like 'word1', 'word2', 'definition1', 'example1'\n"
             f"5. DO NOT use Python libraries\n"
             f"6. Focus on complete, meaningful vocabulary entries only\n\n"
 
@@ -236,7 +237,7 @@ def process_vocab_image(image_path: str, tracker: ImageProcessingTracker):
         print("📊 Using smolagents native image support...")
         
         # Store original CSV state to check if new content was added
-        csv_path = "anki_cards.csv"
+        csv_path = "output/anki_cards.csv"
         original_csv_content = ""
         if os.path.exists(csv_path):
             with open(csv_path, 'r', encoding='utf-8') as f:
@@ -358,7 +359,7 @@ def process_all_images(input_directory="input"):
     if not new_images:
         print("\n🎉 All images have already been successfully processed!")
         stats = tracker.get_processing_stats()
-        print(f"📊 Final stats: {stats['successful']} successful, {stats['failed']} failed out of {stats['total']} total")
+        print(f"📊 Final stats: {stats['successful']} successful, {stats['failed']} failed out of {stats['total']}")
         return
     
     print(f"\n🚀 Processing {len(new_images)} images...")
@@ -392,8 +393,11 @@ def process_all_images(input_directory="input"):
 
 
 if __name__ == "__main__":
-    # Set up automatic logging to agent_output.txt
-    log_file = "agent_output.txt"
+    # Ensure output directory exists
+    os.makedirs("output", exist_ok=True)
+    
+    # Set up automatic logging to output/agent_output.txt
+    log_file = "output/agent_output.txt"
     
     # Create TeeOutput to write to both console and file
     tee_stdout = TeeOutput(log_file)
@@ -433,5 +437,4 @@ if __name__ == "__main__":
         tee_stdout.close()
         tee_stderr.close()
         
-        print(f"✅ Execution complete. Full log saved to: {log_file}")
         print(f"✅ Execution complete. Full log saved to: {log_file}")
